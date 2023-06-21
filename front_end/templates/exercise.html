@@ -185,7 +185,251 @@
 
             <div id="saved_div" class="ml-0 mt-0 mr-2 is-pulled-right mt-0 smaller-font"></div>
 
-            <div class="smaller-font is-pulled-right mt-0 mr-1"><em>{{ exercise_basics["title"] }}</em></div>
+            <!-- <div class="smaller-font is-pulled-right mt-0 mr-1" style="padding-left: 10px"><em>{{ exercise_basics["title"] }}</em></div> -->
+
+            <div id="steps_dropdown" class="dropdown is-pulled-right" style="width: fit-content; position: absolute; top: 350px; right: 600px;" onclick="toggleDropdown('steps_dropdown')">
+                <div class="dropdown-trigger">
+                    <button class="button is-success has-text-white" aria-haspopup="true" style="padding: 0 50px;">
+                        <span>Step by Step Process</span>
+                        <span class="icon-is-small">
+                            <i class="fas fa-angle-down" aria-hidden="true" style="margin-left: 10px"></i>
+                        </span>
+                    </button>
+                </div>
+                <div class="dropdown-menu" id="dropdown-menu" role="menu" style="min-width: 100%;">
+                    <div class="dropdown-content" id="dropdown-content" style= "max-height: 350px; overflow-y: auto;">
+                        <div class="dropdown-item" style="flex: 1;">
+                            <p style ="text-align: center;"><i>Generated using <strong>GPT-v3.5-turbo</strong></i></p>
+                        </div>
+                        <hr class="dropdown-divider" style="flex-basis: 100%; width: 100%;">                       
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                // Get the dropdown element
+                const dropdown = document.getElementById('steps_dropdown');
+
+                // Example JSON object
+                    var dropdownItems = [
+                    "1) Define a function called printFlowerSummary that takes a single argument which is a list of flower names.",
+                    "2) Create an empty dictionary to store the counts of each flower color observed.",
+                    "3) Loop through the list of flower names, and for each flower, extract the color and increment the corresponding count in the dictionary.",
+                    "4) Sum the total number of flowers observed.",
+                    "5) Print a summary of the counts of each color of flower and the total number of flowers observed."
+                ];
+
+                // Variables to track the mouse position and the dropdown offset
+                let mouseX = 0;
+                let mouseY = 0;
+                let offsetX = 0;
+                let offsetY = 0;
+                let isDragging = false;
+
+                // Function to handle mouse down event
+                function handleMouseDown(event) {
+                isDragging = true;
+                offsetX = event.clientX - dropdown.offsetLeft;
+                offsetY = event.clientY - dropdown.offsetTop;
+                }
+
+                // Function to handle mouse move event
+                function handleMouseMove(event) {
+                if (!isDragging) return;
+
+                mouseX = event.clientX;
+                mouseY = event.clientY;
+
+                // Update the dropdown position
+                dropdown.style.left = `${mouseX - offsetX}px`;
+                dropdown.style.top = `${mouseY - offsetY}px`;
+                }
+
+                // Function to handle mouse up event
+                function handleMouseUp() {
+                isDragging = false;
+                }
+
+                // Function to generate dropdown items dynamically
+                function generateDropdownItems() {
+                    var dropdownContent = document.getElementById("dropdown-content");
+
+                    dropdownItems.forEach(function (item) {
+                        var div = document.createElement("div");
+                        div.className = "dropdown-item";
+                        div.style.flex = "1";
+
+                        var p = document.createElement("p");
+                        p.style.textAlign = "justify";
+                        p.textContent = item;
+
+                        div.appendChild(p);
+                        dropdownContent.appendChild(div);
+
+                        var hr = document.createElement("hr");
+                        hr.className = "dropdown-divider";
+                        hr.style.flexBasis = "100%";
+                        hr.style.width = "100%";
+
+                        dropdownContent.appendChild(hr);
+                    });
+                }
+
+                // Wait for the DOM to be fully loaded
+                document.addEventListener("DOMContentLoaded", function () {
+                    generateDropdownItems();
+                    // Add event listeners
+                    dropdown.addEventListener('mousedown', handleMouseDown);
+                    document.addEventListener('mousemove', handleMouseMove);
+                    document.addEventListener('mouseup', handleMouseUp);
+                });
+            </script>
+
+
+            <p class="button is-medium is-primary is-outlined is-pulled-right mt-0 mr-1 margin-bottom my-2" id="review_button">Code Reviewer</p>
+
+            <div class="modal" id="code_review_modal">
+                <div class="modal-background" id="modal_background"></div>
+                <div class="modal-card">
+                    <header class="modal-card-head">
+                        <p class="modal-card-title">Select step to review:</p>
+                    </header>
+                    <section class="modal-card-body">
+                        <table class="table is-narrow table-is-bordered is-fullwidth">
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="select is-fullwidth">
+                                            <select id="step_dropdown">
+                                                <option value="step1">Step 1</option>
+                                                <option value="step2">Step 2</option>
+                                                <option value="step3">Step 3</option>
+                                                <option value="step4">Step 4</option>
+                                                <option value="step5">Step 5</option>
+                                                <!-- Add more options for each step -->
+                                            </select>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <!-- Add your code review form or content here -->
+                    </section>
+                    <footer class="modal-card-foot">
+                        <button class="button is-success" onclick="appendDummyCodeToEditor()">Confirm</button>
+                        <button class="button" onclick="closeModal()">Cancel</button>
+                    </footer>
+                </div>
+                </div>
+
+                <!-- <textarea id="codeEditor" rows="10" cols="50"></textarea> -->
+
+            <style>
+            /* CSS styling for the modal */
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 9999;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.01);
+            }
+
+            .modal-content {
+                position: fixed;
+                top: 10%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background-color: white;
+                padding: 20px;
+                border-radius: 10px;
+                max-width: 600px;
+                max-height: fit-content;
+            }
+
+            .modal-close {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background-color: transparent;
+                border: none;
+                cursor: pointer;
+            }
+
+            .table {
+                border-radius: 4px;
+            }
+
+            .is-rounded-top {
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
+            }
+
+            .select-text {
+                font-weight: bold;
+                padding: 10px;
+            }
+            </style>
+
+            <script>
+            // Function to open the modal
+            function openModal() {
+                var modal = document.getElementById('code_review_modal');
+                modal.style.display = 'block';
+                document.getElementById('modal_background').addEventListener('click', closeModal);
+            }
+
+            // Function to close the modal
+            function closeModal() {
+                var modal = document.getElementById('code_review_modal');
+                modal.style.display = 'none';
+                document.getElementById('modal_background').removeEventListener('click', closeModal);
+            }
+
+            // Event listener for code review button
+            var reviewButton = document.getElementById('review_button');
+            if (reviewButton) {
+                reviewButton.addEventListener('click', openModal);
+            }
+
+            var closeButton = document.querySelector('.modal-close');
+            if (closeButton) {
+                closeButton.addEventListener('click', closeModal);
+            }
+
+            // Dummy data to be appended to the code editor
+            var dummyCode = `
+                // Dummy code
+                function dummyFunction() {
+                console.log('This is dummy code.');
+                }
+            `;
+
+            function get_user_code() {
+                // This line allows you to execute only the selected part of the code.
+                // But it may cause confusion to students, so it is disabled.
+                var user_code = editor.getSelectedText().trim();
+
+                if (user_code == "")
+                    user_code = editor.getValue().trim();
+
+                return user_code;
+            }
+
+            function appendDummyCodeToEditor() {
+                var selectedStep = document.getElementById('step_dropdown').value;
+                var codeEditor = document.getElementById('code_editor');
+                var existingCode = get_user_code();
+                codeEditor.value = existingCode + '\n' + dummyCode;
+
+                // Close the modal
+                closeModal();
+            }
+
+            </script>
+            
 
             <div class="buttons">
                 <a class="button is-medium is-dark" id='submit_button'>Submit</a>
