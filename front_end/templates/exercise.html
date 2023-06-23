@@ -311,21 +311,43 @@
                                         </div>
                                     </td>
                                 </tr>
+
+
+
                             </tbody>
                         </table>
                         <!-- Add your code review form or content here -->
                     </section>
                     <footer class="modal-card-foot">
-                        <button class="button is-success" onclick="appendDummyCodeToEditor()">Confirm</button>
+                        <button class="button is-success" onclick="checkStepFunctionality()">Confirm</button>
                         <button class="button" onclick="closeModal()">Cancel</button>
                     </footer>
                 </div>
+            </div>
+            
+            <!-- Feedback modal -->
+            <div class="modal" id="feedback_modal">
+                <div class="modal-background" id="feedback_modal_background"></div>
+                <div class="modal-content">
+                    <header class="modal-card-head">
+                        <p class="modal-card-title" id="step_feedback_title"></p>
+                        <button class="modal-close" onclick="closeFeedbackModal()"></button>
+                    </header>
+                    <section class="modal-card-body" id="step_feedback_body">
+                        <!-- Feedback content will be dynamically added here -->
+                    </section>
+                    <footer class="modal-card-foot">
+                        <button class="button is-success" onclick="viewHint()">View hint</button>
+                        <button class="button" onclick="goBack()">Back</button>
+                    </footer>
                 </div>
+            </div>
 
-                <!-- <textarea id="codeEditor" rows="10" cols="50"></textarea> -->
+            <!-- Include the necessary FontAwesome library -->
+            <script src="https://kit.fontawesome.com/your-font-awesome-kit.js" crossorigin="anonymous"></script>
 
             <style>
-            /* CSS styling for the modal */
+            /* CSS styling for the modals */
             .modal {
                 display: none;
                 position: fixed;
@@ -388,22 +410,54 @@
                 document.getElementById('modal_background').removeEventListener('click', closeModal);
             }
 
+            // Function to open the feedback modal
+            function openFeedbackModal(step, feedback) {
+                var feedbackModal = document.getElementById('feedback_modal');
+                var stepTitle = document.getElementById('step_feedback_title');
+                var stepFeedback = document.getElementById('step_feedback_body');
+                stepTitle.textContent = step + ": Feedback";
+                stepFeedback.textContent = feedback;
+                feedbackModal.style.display = 'block';
+                document.getElementById('feedback_modal_background').addEventListener('click', closeFeedbackModal);
+            }
+
+            // Function to close the feedback modal
+            function closeFeedbackModal() {
+                var feedbackModal = document.getElementById('feedback_modal');
+                feedbackModal.style.display = 'none';
+                document.getElementById('feedback_modal_background').removeEventListener('click', closeFeedbackModal);
+            }
+
+            // Function to view hint and append dummy code to editor
+            function viewHint() {
+                appendDummyCodeToEditor();
+                closeFeedbackModal();
+            }
+
+            // Function to go back to the code review modal
+            function goBack() {
+                var feedbackModal = document.getElementById('feedback_modal');
+                feedbackModal.style.display = 'none';
+                openModal();
+            }
+
             // Event listener for code review button
             var reviewButton = document.getElementById('review_button');
             if (reviewButton) {
                 reviewButton.addEventListener('click', openModal);
             }
 
-            var closeButton = document.querySelector('.modal-close');
-            if (closeButton) {
-                closeButton.addEventListener('click', closeModal);
+            // Event listener for hint button
+            var hintButton = document.getElementById('hint-button');
+            if (hintButton) {
+                hintButton.addEventListener('click', viewHint);
             }
 
             // Dummy data to be appended to the code editor
             var dummyCode = `
                 // Dummy code
                 function dummyFunction() {
-                console.log('This is dummy code.');
+                    console.log('This is dummy code.');
                 }
             `;
 
@@ -428,8 +482,29 @@
                 closeModal();
             }
 
+            // Function to check step functionality and display feedback
+            function checkStepFunctionality() {
+                var selectedStep = document.getElementById('step_dropdown').value;
+                var feedback = "";
+
+                // Check the selected step and provide corresponding feedback
+                if (selectedStep === "step1") {
+                    feedback = "Step 1: Feedback\nThe code present in the editor partially encapsulates the functionality described in step 1. However, some key elements are missing.";
+                } else if (selectedStep === "step2") {
+                    feedback = "Step 2: Feedback\nThe code present in the editor nearly encapsulates the functionality described in step 2. You have defined an array which stores all the flower colours, however this definition isn't a dictionary, so there isn't a count 'value' for each flower colour 'key'.";
+                } else if (selectedStep === "step3") {
+                    feedback = "Step 3: Feedback\nThe code present in the editor meets the requirements for step 3. Great job!";
+                } else if (selectedStep === "step4") {
+                    feedback = "Step 4: Feedback\nThe code present in the editor partially encapsulates the functionality described in step 4. However, there are some logic issues that need to be addressed.";
+                } else if (selectedStep === "step5") {
+                    feedback = "Step 5: Feedback\nThe code present in the editor doesn't meet the requirements for step 5. Some key elements are missing.";
+                }
+
+                // Open the feedback modal and display the feedback
+                openFeedbackModal(selectedStep, feedback);
+            }
             </script>
-            
+
 
             <div class="buttons">
                 <a class="button is-medium is-dark" id='submit_button'>Submit</a>
