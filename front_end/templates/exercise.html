@@ -455,32 +455,54 @@
 
             // Dummy data to be appended to the code editor
             var dummyCode = `
-                // Dummy code
+                // hint
                 function dummyFunction() {
                     console.log('This is dummy code.');
                 }
             `;
 
+            var hintButton = document.getElementById('hint-button');
+            if (hintButton) {
+                hintButton.addEventListener('click', viewHint);
+            }
+
             function get_user_code() {
                 // This line allows you to execute only the selected part of the code.
                 // But it may cause confusion to students, so it is disabled.
-                var user_code = editor.getSelectedText().trim();
-
-                if (user_code == "")
-                    user_code = editor.getValue().trim();
-
+                var user_code = editor.getValue().trim();
                 return user_code;
             }
 
             function appendDummyCodeToEditor() {
+                // Get the selected step from the dropdown
                 var selectedStep = document.getElementById('step_dropdown').value;
-                var codeEditor = document.getElementById('code_editor');
+
+                // Get the existing code from the editor
                 var existingCode = get_user_code();
-                codeEditor.value = existingCode + '\n' + dummyCode;
+
+                // Define placeholder data types for variables
+                var placeholderTypes = {
+                    variable1: 'int',
+                    variable2: 'string',
+                    variable3: 'boolean'
+                };
+
+                // Replace variable names with placeholders and data types in the dummy code
+                for (var variable in placeholderTypes) {
+                    var regex = new RegExp(variable, 'g');
+                    dummyCode = dummyCode.replace(regex, placeholderTypes[variable] + ' ' + variable);
+                }
+
+                // Combine existing code and dummy code
+                var updatedCode = existingCode + dummyCode;
+
+                // Set the updated code in the editor
+                editor.setValue(updatedCode);
 
                 // Close the modal
                 closeModal();
             }
+
 
             // Function to check step functionality and display feedback
             function checkStepFunctionality() {
