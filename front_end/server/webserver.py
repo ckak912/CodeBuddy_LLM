@@ -14,6 +14,16 @@ from tornado.web import *
 import traceback
 import ui_methods
 
+class BaseHandler(RequestHandler):
+    def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "https://api.openai.com") # Only allow from openAI domain
+        self.set_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.set_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+class HomeHandler(BaseHandler):
+    def get(self):
+        self.write("Hello, world!")
+
 def make_app(settings_dict):
     app = Application(
         [
@@ -91,6 +101,7 @@ def make_app(settings_dict):
             url(r"/view_exercise_scores/([^/]+)/([^/]+)/([^/]+)", ViewExerciseScoresHandler, name="view_exercise_scores"),
             url(r"/view_student_assignment_scores/([^/]+)/([^/]+)", ViewStudentAssignmentScoresHandler, name="view_student_assignment_scores")
         ],
+        default_handler_class=BaseHandler,
         autoescape=None,
         debug=(int(settings_dict["f_num_processes"]) == 1 and 'DEBUG' in os.environ and os.environ['DEBUG'] == 'true'),
         ui_methods=ui_methods
@@ -151,9 +162,9 @@ if __name__ == "__main__":
             print(f"Checking database status for version {v+1}...")
 
             if os.path.isfile(f"migration_scripts/{migration}.py"):
-                command = f"python3 migration_scripts/{migration}.py"
+                command = f"python migration_scripts/{migration}.py"
             else:
-                command = f"python3 migration_scripts/migrate.py {migration}"
+                command = f"python migration_scripts/migrate.py {migration}"
 
             result = run_command(command)
 
