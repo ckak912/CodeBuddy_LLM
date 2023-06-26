@@ -1,46 +1,35 @@
-const OPENAI_API_KEY = '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';
+const OPENAI_API_KEY = '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';
 const apiUrl = 'https://api.openai.com/v1/chat/completions';
+const model_role = 'Your role is that of a lecturer for an introductory programming course for 1st year university students. You never give out complete answers, you only provide hints.'
 
-const model_prompt = `Task: Online Shopping Cart
+const model_task_description = `Here's a task description that incorporates the concepts of arrays, data structures, conditional statements, and loops using functions and user input:
+
+Task: Student Grade Calculator
 
 Description:
-You are tasked with creating an online shopping cart system that allows users to browse products, add items to their cart, view the cart contents, and calculate the total price of the items in the cart. The program should provide a user-friendly interface for managing the shopping experience.
+You are tasked with creating a program that calculates the average grade of a student based on their individual subject grades. The program should take inputs from the user, calculate the average grade, and provide feedback based on the average grade obtained.
 
 Requirements:
 
-Product Management:
+Implement a function called calculate_average_grade that takes an array of subject grades as input.
+The grades are represented as integers ranging from 0 to 100.
+The function should calculate and return the average grade.
+Implement a function called provide_feedback that takes the average grade as input.
+Based on the average grade, the function should provide feedback according to the following criteria:
+If the average grade is below 40, print "You need to improve your performance."
+If the average grade is between 40 and 70 (both inclusive), print "Your performance is satisfactory."
+If the average grade is above 70, print "You have excelled in your studies."
+Implement a main program that prompts the user to enter the number of subjects they have grades for.
+Based on the number of subjects, the program should prompt the user to enter the grades for each subject.
+The program should call the calculate_average_grade function with the grades as input and store the result.
+Finally, the program should call the provide_feedback function with the average grade as input and display the feedback to the user.
 
-Implement a class called "Product" that represents a product in the online store. Each product should have the following attributes:
-Name: The name of the product (a string).
-Price: The price of the product (a floating-point number).
-Quantity: The available quantity of the product (an integer).
-Shopping Cart Management:
+Your task is to implement the required functions and main program to achieve the above functionality. Ensure that the program handles invalid inputs gracefully and provides appropriate error messages.`;
 
-Create a class called "ShoppingCart" that represents a user's shopping cart. The shopping cart should have the following attributes:
 
-Items: A list to store the products added to the cart.
-Implement the following methods in the "ShoppingCart" class:
+const model_prompt = `As a lecturer, your task is to devise a step by step process for your students that encapsulates the above description. 
+The steps should be in chronological order with an efficient way to complete the task. Ensure that the sub-steps are in concise paragraphs rather than bullet points. Each step is numbered (e.g. 1. , 2. , 3.)`
 
-add_to_cart(product): Adds the given product to the cart.
-remove_from_cart(product): Removes the given product from the cart.
-view_cart(): Displays the contents of the cart, including product names, prices, and quantities.
-calculate_total_price(): Calculates and returns the total price of all items in the cart.
-User Interface:
-
-Write a program that utilizes the "Product" and "ShoppingCart" classes to create an online shopping experience. The program should provide the following functionality:
-Display a list of available products for the user to browse.
-Prompt the user to add products to their shopping cart by entering the product's name and quantity.
-Allow the user to view the contents of their cart, including the names, prices, and quantities of the products.
-Calculate and display the total price of the items in the cart.
-Provide an option for the user to remove items from the cart if desired.
-Note:
-
-Ensure that the program validates user inputs, such as checking for valid product names and quantities.
-You can implement additional methods or functionalities as per your requirements.
-Consider incorporating error handling and user-friendly prompts to enhance the user experience.
-This task challenges students to apply their understanding of OOP principles, arrays, and user interaction to create an online shopping cart system. By designing classes for products and the shopping cart, students can practice managing data, performing calculations, and displaying information. The task encourages students to think about user experience and implement an intuitive interface for seamless online shopping.
-
-given this task description, you, the lecturer has devise a step by step process that will help a novice programmer complete the task. This step by step process is concise and only has numbered steps and paragraphs (no bullet points)`;
 
 const headers = {
   'Content-Type': 'application/json',
@@ -49,7 +38,7 @@ const headers = {
 
 const data = {
   model: 'gpt-3.5-turbo',
-  messages: [{ role: 'user', content: model_prompt }],
+  messages: [{ role: 'user', content: model_role + '\n\n' + model_task_description + '\n\n' + model_prompt}],
   temperature: 0.7
 };
 
@@ -60,18 +49,23 @@ fetch(apiUrl, {
 })
   .then(response => response.json())
   .then(result => {
-    // Handle the API response here
-    const regex = /(\d+)\.\s(.*?)\s?:\s(.*)/g;
-    const dropdownItems = {};
+        console.log()
+          // Extract step numbers and content using regex
+          const regex = /(?:^|\n)(\d+)\.\s+(.*)/g;
 
-    let match;
-    while ((match = regex.exec(result.choices[0].message.content)) !== null) {
-    const stepNumber = match[1];
-    const stepDescription = match[3];
-    dropdownItems[stepNumber] = stepDescription;
-    }
+          let match;
+          const steps = {};
 
-    console.log(JSON.stringify({ dropdownItems }, null, 2));
+          while ((match = regex.exec(result.choices[0].message.content)) !== null) {
+            const stepNumber = match[1];
+            const stepContent = match[2];
+            steps[stepNumber] = stepContent;
+          }
+          // Convert the steps object to JSON
+          const stepsJSON = JSON.stringify(steps, null, 2);
+
+          // Print the JSON object
+          console.log(stepsJSON);
   })
   .catch(error => {
     console.error(error);
