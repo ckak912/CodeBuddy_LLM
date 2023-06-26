@@ -20,10 +20,6 @@ class BaseHandler(RequestHandler):
         self.set_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.set_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
-class HomeHandler(BaseHandler):
-    def get(self):
-        self.write("Hello, world!")
-
 def make_app(settings_dict):
     app = Application(
         [
@@ -112,7 +108,7 @@ def make_app(settings_dict):
 
     return app
 
-class StaticFileHandler(RequestHandler):
+class StaticFileHandler(BaseHandler):
     async def get(self, file_name):
         if file_name.endswith(".html"):
             try:
