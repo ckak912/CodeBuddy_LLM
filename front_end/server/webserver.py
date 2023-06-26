@@ -14,6 +14,17 @@ from tornado.web import *
 import traceback
 import ui_methods
 
+
+class BaseHandler(RequestHandler):
+    def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "https://api.openai.com") # Only allow from openAI domain
+        self.set_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.set_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+class HomeHandler(BaseHandler):
+    def get(self):
+        self.write("Hello, world!")
+
 def make_app(settings_dict):
     app = Application(
         [
@@ -91,6 +102,7 @@ def make_app(settings_dict):
             url(r"/view_exercise_scores/([^/]+)/([^/]+)/([^/]+)", ViewExerciseScoresHandler, name="view_exercise_scores"),
             url(r"/view_student_assignment_scores/([^/]+)/([^/]+)", ViewStudentAssignmentScoresHandler, name="view_student_assignment_scores")
         ],
+        default_handler_class=BaseHandler,
         autoescape=None,
         debug=(int(settings_dict["f_num_processes"]) == 1 and 'DEBUG' in os.environ and os.environ['DEBUG'] == 'true'),
         ui_methods=ui_methods
@@ -101,7 +113,7 @@ def make_app(settings_dict):
 
     return app
 
-class StaticFileHandler(RequestHandler):
+class StaticFileHandler(BaseHandler):
     async def get(self, file_name):
         if file_name.endswith(".html"):
             try:
