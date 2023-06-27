@@ -187,7 +187,7 @@
 
             <!-- <div class="smaller-font is-pulled-right mt-0 mr-1" style="padding-left: 10px"><em>{{ exercise_basics["title"] }}</em></div> -->
 
-            <div id="steps_dropdown" class="dropdown is-pulled-right" style="width: fit-content; position: absolute; top: 350px; right: 600px;" onclick="toggleDropdown('steps_dropdown')">
+            <div id="steps_dropdown" class="dropdown is-pulled-right" style="width: fit-content; position: absolute; top: 350px; right: 600px;" onclick="toggleDropdown('steps_dropdown')" disabled>
                 <div class="dropdown-trigger">
                     <button class="button is-success has-text-white" aria-haspopup="true" style="padding: 0 50px;">
                         <span>Step by Step Process</span>
@@ -206,11 +206,121 @@
                 </div>
             </div>
 
+
+            <p class="button is-medium is-primary is-outlined is-pulled-right mt-0 mr-1 margin-bottom my-2" id="review_button" disabled>Code Reviewer</p>
+
+            <div class="modal" id="code_review_modal">
+                <div class="modal-background" id="modal_background"></div>
+                <div class="modal-card">
+                    <header class="modal-card-head">
+                        <p class="modal-card-title">Select step to review:</p>
+                    </header>
+                    <section class="modal-card-body">
+                        <table class="table is-narrow table-is-bordered is-fullwidth">
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="select is-fullwidth">
+                                            <select id="step_dropdown">
+                                                <!-- Add more options for each step -->
+                                            </select>
+                                        </div>
+                                    </td>
+                                </tr>
+
+
+
+                            </tbody>
+                        </table>
+                        <!-- Add your code review form or content here -->
+                    </section>
+                    <footer class="modal-card-foot">
+                        <button class="button is-success" onclick="checkStepFunctionality()">Confirm</button>
+                        <button class="button" onclick="closeModal()">Cancel</button>
+                    </footer>
+                </div>
+            </div>
+
+            <!-- Feedback modal -->
+            <div class="modal" id="feedback_modal">
+                <div class="modal-background" id="feedback_modal_background"></div>
+                <div class="modal-content">
+                    <header class="modal-card-head">
+                        <p class="modal-card-title" id="step_feedback_title"></p>
+                        <button class="modal-close" onclick="closeFeedbackModal()"></button>
+                    </header>
+                    <section class="modal-card-body" id="step_feedback_body">
+                        <!-- Feedback content will be dynamically added here -->
+                    </section>
+                    <footer class="modal-card-foot">
+                        <button class="button is-success" onclick="viewHint()">View hint</button>
+                        <button class="button" onclick="goBack()">Back</button>
+                    </footer>
+                </div>
+            </div>
+
+            <!-- Include the necessary FontAwesome library -->
+            <script src="https://kit.fontawesome.com/your-font-awesome-kit.js" crossorigin="anonymous"></script>
+
+            <style>
+            /* CSS styling for the modals */
+
+            .disabled {
+                opacity: 0.5;
+                pointer-events: none;
+            }
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 9999;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.01);
+            }
+
+            .modal-content {
+                position: fixed;
+                top: 10%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background-color: white;
+                padding: 20px;
+                border-radius: 10px;
+                max-width: 600px;
+                max-height: fit-content;
+            }
+
+            .modal-close {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background-color: transparent;
+                border: none;
+                cursor: pointer;
+            }
+
+            .table {
+                border-radius: 4px;
+            }
+
+            .is-rounded-top {
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
+            }
+
+            .select-text {
+                font-weight: bold;
+                padding: 10px;
+            }
+            </style>
+
             <script>
                 // Get the dropdown element
                 const dropdown = document.getElementById('steps_dropdown');
 
-                const OPENAI_API_KEY = '';
+                const OPENAI_API_KEY = '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';
                 
                 const apiUrl = 'https://api.openai.com/v1/chat/completions';
                 const model_role = 'Your role is that of a lecturer for an introductory programming course for 1st year university students. You never give out complete answers, you only provide hints.'
@@ -260,6 +370,7 @@
                 let offsetX = 0;
                 let offsetY = 0;
                 let isDragging = false;
+                let steps = {};
 
                 // Function to handle mouse down event
                 function handleMouseDown(event) {
@@ -287,6 +398,7 @@
 
                 // Function to generate dropdown items dynamically
                 async function generateDropdownItems() {
+                    
                     const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers,
@@ -300,7 +412,6 @@
                     // Extract step numbers and content using regex
                     const regex = /(?:^|\n)(\d+)\.\s+(.*)/g;
                     let match;
-                    const steps = {};
 
                     while ((match = regex.exec(result.choices[0].message.content)) !== null) {
                         const stepNumber = match[1];
@@ -310,7 +421,7 @@
                     // Convert the steps object to JSON
                     const stepsJSON = JSON.stringify(steps, null, 2);
 
-                    console.log(stepsJSON);
+                    console.log(stepsJSON);                
 
                     var dropdownContent = document.getElementById("dropdown-content");
                     dropdownContent.innerHTML = ""; // Clear existing content
@@ -334,6 +445,23 @@
 
                         dropdownContent.appendChild(hr);
                     });
+
+
+                    // Generate dropdown items
+                    var stepDropdown = document.getElementById("step_dropdown");
+                    stepDropdown.innerHTML = ""; // Clear existing options
+
+                    Object.keys(steps).forEach(function(stepNumber) {
+                        var option = document.createElement("option");
+                        option.value = "Step " + stepNumber;
+                        option.textContent = "Step " + stepNumber;
+                        stepDropdown.appendChild(option);
+                    });
+                    // Remove disabled state and CSS class from the button
+                    var reviewButton = document.getElementById("review_button");
+                    reviewButton.removeAttribute("disabled");
+                    reviewButton.classList.remove("disabled");
+
                 }
 
                 // Wait for the DOM to be fully loaded
@@ -346,115 +474,6 @@
 
                 });
             </script>
-
-            <p class="button is-medium is-primary is-outlined is-pulled-right mt-0 mr-1 margin-bottom my-2" id="review_button">Code Reviewer</p>
-
-            <div class="modal" id="code_review_modal">
-                <div class="modal-background" id="modal_background"></div>
-                <div class="modal-card">
-                    <header class="modal-card-head">
-                        <p class="modal-card-title">Select step to review:</p>
-                    </header>
-                    <section class="modal-card-body">
-                        <table class="table is-narrow table-is-bordered is-fullwidth">
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <div class="select is-fullwidth">
-                                            <select id="step_dropdown">
-                                                <option value="step1">Step 1</option>
-                                                <option value="step2">Step 2</option>
-                                                <option value="step3">Step 3</option>
-                                                <option value="step4">Step 4</option>
-                                                <option value="step5">Step 5</option>
-                                                <!-- Add more options for each step -->
-                                            </select>
-                                        </div>
-                                    </td>
-                                </tr>
-
-
-
-                            </tbody>
-                        </table>
-                        <!-- Add your code review form or content here -->
-                    </section>
-                    <footer class="modal-card-foot">
-                        <button class="button is-success" onclick="checkStepFunctionality()">Confirm</button>
-                        <button class="button" onclick="closeModal()">Cancel</button>
-                    </footer>
-                </div>
-            </div>
-
-            <!-- Feedback modal -->
-            <div class="modal" id="feedback_modal">
-                <div class="modal-background" id="feedback_modal_background"></div>
-                <div class="modal-content">
-                    <header class="modal-card-head">
-                        <p class="modal-card-title" id="step_feedback_title"></p>
-                        <button class="modal-close" onclick="closeFeedbackModal()"></button>
-                    </header>
-                    <section class="modal-card-body" id="step_feedback_body">
-                        <!-- Feedback content will be dynamically added here -->
-                    </section>
-                    <footer class="modal-card-foot">
-                        <button class="button is-success" onclick="viewHint()">View hint</button>
-                        <button class="button" onclick="goBack()">Back</button>
-                    </footer>
-                </div>
-            </div>
-
-            <!-- Include the necessary FontAwesome library -->
-            <script src="https://kit.fontawesome.com/your-font-awesome-kit.js" crossorigin="anonymous"></script>
-
-            <style>
-            /* CSS styling for the modals */
-            .modal {
-                display: none;
-                position: fixed;
-                z-index: 9999;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0, 0, 0, 0.01);
-            }
-
-            .modal-content {
-                position: fixed;
-                top: 10%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background-color: white;
-                padding: 20px;
-                border-radius: 10px;
-                max-width: 600px;
-                max-height: fit-content;
-            }
-
-            .modal-close {
-                position: absolute;
-                top: 10px;
-                right: 10px;
-                background-color: transparent;
-                border: none;
-                cursor: pointer;
-            }
-
-            .table {
-                border-radius: 4px;
-            }
-
-            .is-rounded-top {
-                border-top-left-radius: 4px;
-                border-top-right-radius: 4px;
-            }
-
-            .select-text {
-                font-weight: bold;
-                padding: 10px;
-            }
-            </style>
 
             <script>
             // Function to open the modal
@@ -567,21 +586,12 @@
 
             // Function to check step functionality and display feedback
             function checkStepFunctionality() {
+                
                 var selectedStep = document.getElementById('step_dropdown').value;
                 var feedback = "";
 
                 // Check the selected step and provide corresponding feedback
-                if (selectedStep === "step1") {
-                    feedback = "Step 1: Feedback\nThe code present in the editor partially encapsulates the functionality described in step 1. However, some key elements are missing.";
-                } else if (selectedStep === "step2") {
-                    feedback = "Step 2: Feedback\nThe code present in the editor nearly encapsulates the functionality described in step 2. You have defined an array which stores all the flower colours, however this definition isn't a dictionary, so there isn't a count 'value' for each flower colour 'key'.";
-                } else if (selectedStep === "step3") {
-                    feedback = "Step 3: Feedback\nThe code present in the editor meets the requirements for step 3. Great job!";
-                } else if (selectedStep === "step4") {
-                    feedback = "Step 4: Feedback\nThe code present in the editor partially encapsulates the functionality described in step 4. However, there are some logic issues that need to be addressed.";
-                } else if (selectedStep === "step5") {
-                    feedback = "Step 5: Feedback\nThe code present in the editor doesn't meet the requirements for step 5. Some key elements are missing.";
-                }
+                feedback = selectedStep + ": You are the very good coding guy";
 
                 // Open the feedback modal and display the feedback
                 openFeedbackModal(selectedStep, feedback);
