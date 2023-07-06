@@ -320,50 +320,6 @@
                 // Get the dropdown element
                 const dropdown = document.getElementById('steps_dropdown');
 
-                const OPENAI_API_KEY = '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';
-                
-                const apiUrl = 'https://api.openai.com/v1/chat/completions';
-                const model_role = 'Your role is that of a lecturer for an introductory programming course for 1st year university students. You never give out complete answers, you only provide hints.'
-                const model_task_description = `Here's a task description that incorporates the concepts of arrays, data structures, conditional statements, and loops using functions and user input:
-
-                Task: Student Grade Calculator
-
-                Description:
-                You are tasked with creating a program that calculates the average grade of a student based on their individual subject grades. The program should take inputs from the user, calculate the average grade, and provide feedback based on the average grade obtained.
-
-                Requirements:
-
-                Implement a function called calculate_average_grade that takes an array of subject grades as input.
-                The grades are represented as integers ranging from 0 to 100.
-                The function should calculate and return the average grade.
-                Implement a function called provide_feedback that takes the average grade as input.
-                Based on the average grade, the function should provide feedback according to the following criteria:
-                If the average grade is below 40, print "You need to improve your performance."
-                If the average grade is between 40 and 70 (both inclusive), print "Your performance is satisfactory."
-                If the average grade is above 70, print "You have excelled in your studies."
-                Implement a main program that prompts the user to enter the number of subjects they have grades for.
-                Based on the number of subjects, the program should prompt the user to enter the grades for each subject.
-                The program should call the calculate_average_grade function with the grades as input and store the result.
-                Finally, the program should call the provide_feedback function with the average grade as input and display the feedback to the user.
-
-                Your task is to implement the required functions and main program to achieve the above functionality. Ensure that the program handles invalid inputs gracefully and provides appropriate error messages.`;
-
-
-                const model_prompt = `As a lecturer, your task is to devise a step by step process for your students that encapsulates the above description. 
-                The steps should be in chronological order with an efficient way to complete the task. Ensure that the sub-steps are in concise paragraphs rather than bullet points. Each step is numbered (e.g. 1. , 2. , 3.)`
-
-
-                const headers = {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${OPENAI_API_KEY}`
-                };
-
-                const data = {
-                model: 'gpt-3.5-turbo',
-                messages: [{ role: 'user', content: model_role + '\n\n' + model_task_description + '\n\n' + model_prompt}],
-                temperature: 0.7
-                };
-
                 // Variables to track the mouse position and the dropdown offset
                 let mouseX = 0;
                 let mouseY = 0;
@@ -398,71 +354,28 @@
 
                 // Function to generate dropdown items dynamically
                 async function generateDropdownItems() {
-                    
-                    const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers,
-                    body: JSON.stringify(data)
+                try {
+                    // Make an HTTP request to the exercise endpoint
+                    const response = await fetch('/exercise/:course_id/:assignment_id/:exercise_id', {
+                    method: 'GET',
+                    // Add any necessary headers or data
                     });
 
-                    const result = await response.json();
-
-
-
-                    // Extract step numbers and content using regex
-                    const regex = /(?:^|\n)(\d+)\.\s+(.*)/g;
-                    let match;
-
-                    while ((match = regex.exec(result.choices[0].message.content)) !== null) {
-                        const stepNumber = match[1];
-                        const stepContent = match[2];
-                        steps[stepNumber] = stepContent;
+                    // Check the response status
+                    if (!response.ok) {
+                    throw new console.log('Failed to fetch exercise data');
                     }
-                    // Convert the steps object to JSON
-                    const stepsJSON = JSON.stringify(steps, null, 2);
 
-                    console.log(stepsJSON);                
+                    // // Parse the response data
+                    // const result = response.json();
+                    console.log(response)
 
-                    var dropdownContent = document.getElementById("dropdown-content");
-                    dropdownContent.innerHTML = ""; // Clear existing content
-
-                    Object.entries(steps).forEach(function ([stepNumber, stepContent]) {
-                        var div = document.createElement("div");
-                        div.className = "dropdown-item";
-                        div.style.flex = "1";
-
-                        var p = document.createElement("p");
-                        p.style.textAlign = "justify";
-                        p.textContent = `${stepNumber}. ${stepContent}`;
-
-                        div.appendChild(p);
-                        dropdownContent.appendChild(div);
-
-                        var hr = document.createElement("hr");
-                        hr.className = "dropdown-divider";
-                        hr.style.flexBasis = "100%";
-                        hr.style.width = "100%";
-
-                        dropdownContent.appendChild(hr);
-                    });
-
-
-                    // Generate dropdown items
-                    var stepDropdown = document.getElementById("step_dropdown");
-                    stepDropdown.innerHTML = ""; // Clear existing options
-
-                    Object.keys(steps).forEach(function(stepNumber) {
-                        var option = document.createElement("option");
-                        option.value = "Step " + stepNumber;
-                        option.textContent = "Step " + stepNumber;
-                        stepDropdown.appendChild(option);
-                    });
-                    // Remove disabled state and CSS class from the button
-                    var reviewButton = document.getElementById("review_button");
-                    reviewButton.removeAttribute("disabled");
-                    reviewButton.classList.remove("disabled");
-
+                } catch (error) {
+                    console.error('Error fetching exercise data:', error);
+                    // Handle the error gracefully
                 }
+
+            }
 
                 // Wait for the DOM to be fully loaded
                 document.addEventListener("DOMContentLoaded", function () {
@@ -471,8 +384,9 @@
                     dropdown.addEventListener('mousedown', handleMouseDown);
                     document.addEventListener('mousemove', handleMouseMove);
                     document.addEventListener('mouseup', handleMouseUp);
-
                 });
+
+
             </script>
 
             <script>
