@@ -132,6 +132,8 @@ class StaticFileHandler(BaseHandler):
                 read_mode = "rb"
             elif file_name.endswith(".webmanifest"):
                 content_type = "application/json"
+            elif file_name.endswith(".json"):
+                content_type = "application/json"
 
             file_contents = read_file("static/{}".format(file_name), mode=read_mode)
 

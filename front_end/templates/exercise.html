@@ -160,6 +160,34 @@
                 <div id="hint_text" class="is-hidden hint-text"><p style="margin-top: 10px;">{{ exercise_details["hint"] }}</p></div>
             {% end %}
 
+            <div class="llm_bar">
+
+                <a class="button is-medium is-primary" id="help" onclick="generate_help()">Help Me</a>
+                
+
+                <div id="steps_dropdown" class="top-space dropdown is-primary is-outlined is-pulled-right margin-bottom my-5 mt-5" style="width: fit-content;  " onclick="toggleDropdown('steps_dropdown')">
+                    <div class="dropdown-trigger">
+                        <button class="button is-success has-text-white" aria-haspopup="true" style="padding: 0 100px;">
+                            <span>Step by Step Process</span>
+                            <span class="icon-is-small">
+                                <i class="fas fa-angle-down" aria-hidden="true" style="margin-left: 10px"></i>
+                            </span>
+                        </button>
+                    </div>
+                    <div class="dropdown-menu" id="dropdown-menu" role="menu" style="min-width: 100%;">
+                        <div class="dropdown-content" id="dropdown-content" style= "max-height: 350px; overflow-y: auto;">
+                            <div class="dropdown-item" style="flex: 1;">
+                                <p style ="text-align: center;"><i>Generated using <strong>GPT-v3.5-turbo</strong></i></p>
+                            </div>
+                            <hr class="dropdown-divider" style="flex-basis: 100%; width: 100%;">                       
+                        </div>
+                    </div>
+                </div>
+
+                <a class="button is-medium is-primary" id="steps" onclick="generateDropdownItems()">Steps</a>
+            </div>
+            
+
             <p class="top-space" id="user_code_area">
                 <textarea class="textarea is-fullwidth monospace" rows="15" id="user_code">{% if exercise_details["starter_code"] and len(submissions) == 0 %}{{ exercise_details["starter_code"] }}{% end %}</textarea>
                 <!--
@@ -187,27 +215,10 @@
 
             <!-- <div class="smaller-font is-pulled-right mt-0 mr-1" style="padding-left: 10px"><em>{{ exercise_basics["title"] }}</em></div> -->
 
-            <div id="steps_dropdown" class="dropdown is-pulled-right" style="width: fit-content; position: absolute; top: 350px; right: 600px;" onclick="toggleDropdown('steps_dropdown')" disabled>
-                <div class="dropdown-trigger">
-                    <button class="button is-success has-text-white" aria-haspopup="true" style="padding: 0 50px;">
-                        <span>Step by Step Process</span>
-                        <span class="icon-is-small">
-                            <i class="fas fa-angle-down" aria-hidden="true" style="margin-left: 10px"></i>
-                        </span>
-                    </button>
-                </div>
-                <div class="dropdown-menu" id="dropdown-menu" role="menu" style="min-width: 100%;">
-                    <div class="dropdown-content" id="dropdown-content" style= "max-height: 350px; overflow-y: auto;">
-                        <div class="dropdown-item" style="flex: 1;">
-                            <p style ="text-align: center;"><i>Generated using <strong>GPT-v3.5-turbo</strong></i></p>
-                        </div>
-                        <hr class="dropdown-divider" style="flex-basis: 100%; width: 100%;">                       
-                    </div>
-                </div>
-            </div>
 
 
-            <p class="button is-medium is-primary is-outlined is-pulled-right mt-0 mr-1 margin-bottom my-2" id="review_button" disabled>Code Reviewer</p>
+
+            <p class="button is-medium is-primary is-outlined is-pulled-right mt-0 mr-1 margin-bottom my-2" id="review_button">Code Reviewer</p>
 
             <div class="modal" id="code_review_modal">
                 <div class="modal-background" id="modal_background"></div>
@@ -265,10 +276,6 @@
             <style>
             /* CSS styling for the modals */
 
-            .disabled {
-                opacity: 0.5;
-                pointer-events: none;
-            }
             .modal {
                 display: none;
                 position: fixed;
@@ -320,71 +327,111 @@
                 // Get the dropdown element
                 const dropdown = document.getElementById('steps_dropdown');
 
-                // Variables to track the mouse position and the dropdown offset
-                let mouseX = 0;
-                let mouseY = 0;
-                let offsetX = 0;
-                let offsetY = 0;
-                let isDragging = false;
                 let steps = {};
 
-                // Function to handle mouse down event
-                function handleMouseDown(event) {
-                isDragging = true;
-                offsetX = event.clientX - dropdown.offsetLeft;
-                offsetY = event.clientY - dropdown.offsetTop;
-                }
+                var count = 1;
 
-                // Function to handle mouse move event
-                function handleMouseMove(event) {
-                if (!isDragging) return;
-
-                mouseX = event.clientX;
-                mouseY = event.clientY;
-
-                // Update the dropdown position
-                dropdown.style.left = `${mouseX - offsetX}px`;
-                dropdown.style.top = `${mouseY - offsetY}px`;
-                }
-
-                // Function to handle mouse up event
-                function handleMouseUp() {
-                isDragging = false;
-                }
 
                 // Function to generate dropdown items dynamically
                 async function generateDropdownItems() {
-                try {
-                    // Make an HTTP request to the exercise endpoint
-                    const response = await fetch('/exercise/:course_id/:assignment_id/:exercise_id', {
-                    method: 'GET',
-                    // Add any necessary headers or data
-                    });
 
-                    // Check the response status
-                    if (!response.ok) {
-                    throw new console.log('Failed to fetch exercise data');
+                
+
+                    
+
+                        try {
+                        // Make an HTTP request to the exercise endpoint
+                        const response = await fetch('/static/step_process.json');
+
+                        // Check the response status
+                        if (!response.ok) {
+                        throw new Error('Failed to fetch exercise data');
+                        }
+
+                        // Parse the response data
+                        steps = await response.json();
+
+
+
+                    } catch (error) {
+                        console.error('Error:', error.message);
                     }
 
-                    // // Parse the response data
-                    // const result = response.json();
-                    console.log(response)
+                    var dropdownContent = document.getElementById("dropdown-content");
 
-                } catch (error) {
-                    console.error('Error fetching exercise data:', error);
-                    // Handle the error gracefully
-                }
+                    Object.entries(steps).forEach(function ([stepNumber, stepContent]) {
+                    var div = document.createElement("div");
+                    div.className = "dropdown-item";
+                    div.style.flex = "1";
 
-            }
+                    var p = document.createElement("p");
+                    p.style.textAlign = "justify";
+                    p.textContent = stepNumber + ". " + stepContent;
+
+                    div.appendChild(p);
+                    dropdownContent.appendChild(div);
+
+                    var hr = document.createElement("hr");
+                    hr.className = "dropdown-divider";
+                    hr.style.flexBasis = "100%";
+                    hr.style.width = "100%";
+
+                    dropdownContent.appendChild(hr);
+                    });
+
+                    // Generate dropdown items
+                    var stepDropdown = document.getElementById("step_dropdown");
+                    stepDropdown.innerHTML = ""; // Clear existing options
+
+                    Object.keys(steps).forEach(function (stepNumber) {
+                    var option = document.createElement("option");
+                    option.value = "Step " + stepNumber;
+                    option.textContent = "Step " + stepNumber;
+                    stepDropdown.appendChild(option);
+                    });
+
+                        
+                    } 
+
+
+                    
+                    function generate_help() {
+                        let help_text;
+
+                        dropdownContent = document.getElementById("dropdown-content");
+
+                        dropdownContent.innerHTML = ""; // Clear existing options
+
+                        
+                        var div = document.createElement("div");
+                        div.className = "dropdown-item";
+                        div.style.flex = "1";
+
+                        var p = document.createElement("p");
+                        p.style.textAlign = "justify";
+                        p.textContent = "Sup G: " + count;
+                        
+                        
+                        div.appendChild(p);
+                        dropdownContent.appendChild(div);
+
+                        var hr = document.createElement("hr");
+                        hr.className = "dropdown-divider";
+                        hr.style.flexBasis = "100%";
+                        hr.style.width = "100%";
+
+                        dropdownContent.appendChild(hr);
+
+                        count += 1;
+
+                    }
 
                 // Wait for the DOM to be fully loaded
                 document.addEventListener("DOMContentLoaded", function () {
                     generateDropdownItems();
-                    // Add event listeners
-                    dropdown.addEventListener('mousedown', handleMouseDown);
-                    document.addEventListener('mousemove', handleMouseMove);
-                    document.addEventListener('mouseup', handleMouseUp);
                 });
+
+                
 
 
             </script>

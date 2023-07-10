@@ -6,7 +6,7 @@ import requests
 class ExerciseHandler(BaseUserHandler):
     entrypoint = 'exercise'
 
-    async def generate_dropdown_items(self):
+    """     async def generate_dropdown_items(self):
         OPENAI_API_KEY = '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'
         API_URL = 'https://api.openai.com/v1/chat/completions'
         model_role = 'Your role is that of a lecturer for an introductory programming course for 1st year university students. You never give out complete answers, you only provide hints.'
@@ -66,7 +66,7 @@ class ExerciseHandler(BaseUserHandler):
         # Convert the steps object to JSON
         steps_json = json.dumps(steps, indent=2)
 
-        return steps_json
+        return steps_json """
 
 
     async def get(self, course_id, assignment_id, exercise_id):
@@ -112,7 +112,7 @@ class ExerciseHandler(BaseUserHandler):
 
             format_exercise_details(exercise_details, course_id, assignment_id, self.user_info, self.content, next_prev_exercises, format_tests=True)
 
-            steps_json = await self.generate_dropdown_items()
+            
 
             args = {
                 "users": user_list,
@@ -141,7 +141,7 @@ class ExerciseHandler(BaseUserHandler):
                 "check_for_restrict_other_assignments": course_details["check_for_restrict_other_assignments"],
                 "help_request": None,
                 "same_suggestion": None,
-                "steps": steps_json,
+                
             }
 
             if studio_mode:
