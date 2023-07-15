@@ -168,7 +168,7 @@
                 <div id="steps_dropdown" class="top-space dropdown is-primary is-outlined is-pulled-right margin-bottom my-5 mt-5" style="width: fit-content;  " onclick="toggleDropdown('steps_dropdown')">
                     <div class="dropdown-trigger">
                         <button class="button is-success has-text-white" aria-haspopup="true" style="padding: 0 100px;">
-                            <span>Step by Step Process</span>
+                            <span>AI Tool</span>
                             <span class="icon-is-small">
                                 <i class="fas fa-angle-down" aria-hidden="true" style="margin-left: 10px"></i>
                             </span>
@@ -177,7 +177,7 @@
                     <div class="dropdown-menu" id="dropdown-menu" role="menu" style="min-width: 100%;">
                         <div class="dropdown-content" id="dropdown-content" style= "max-height: 350px; overflow-y: auto;">
                             <div class="dropdown-item" style="flex: 1;">
-                                <p style ="text-align: center;"><i>Generated using <strong>GPT-v3.5-turbo</strong></i></p>
+                                <p style ="text-align: center;"><i>Generated using <span style="font-weight: bold;">GPT-v3.5-turbo</span></i></p>
                             </div>
                             <hr class="dropdown-divider" style="flex-basis: 100%; width: 100%;">                       
                         </div>
@@ -217,42 +217,24 @@
 
 
 
-
-            <p class="button is-medium is-primary is-outlined is-pulled-right mt-0 mr-1 margin-bottom my-2" id="review_button">Code Reviewer</p>
+        
+            
+            <button onclick="checkStepFunctionality()" class="button is-medium is-primary is-outlined is-pulled-right mt-0 mr-1 margin-bottom my-2 has-tooltip-top has-tooltip-multiline" id="review_button" data-tooltip="Click this button to review your current implementation and get feedback">Code Reviewer</button>
 
             <div class="modal" id="code_review_modal">
                 <div class="modal-background" id="modal_background"></div>
                 <div class="modal-card">
                     <header class="modal-card-head">
-                        <p class="modal-card-title">Select step to review:</p>
+                        <p class="modal-card-title" id="step_feedback_title">Here is some helpful feedback:</p>
                     </header>
-                    <section class="modal-card-body">
-                        <table class="table is-narrow table-is-bordered is-fullwidth">
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <div class="select is-fullwidth">
-                                            <select id="step_dropdown">
-                                                <!-- Add more options for each step -->
-                                            </select>
-                                        </div>
-                                    </td>
-                                </tr>
-
-
-
-                            </tbody>
-                        </table>
-                        <!-- Add your code review form or content here -->
-                    </section>
+                    <section class="modal-card-body" id="step_feedback_body"></section>
                     <footer class="modal-card-foot">
-                        <button class="button is-success" onclick="checkStepFunctionality()">Confirm</button>
-                        <button class="button" onclick="closeModal()">Cancel</button>
+                        <button class="button" onclick="closeModal()">Back</button>
                     </footer>
                 </div>
             </div>
 
-            <!-- Feedback modal -->
+            <!-- Feedback modal
             <div class="modal" id="feedback_modal">
                 <div class="modal-background" id="feedback_modal_background"></div>
                 <div class="modal-content">
@@ -261,17 +243,14 @@
                         <button class="modal-close" onclick="closeFeedbackModal()"></button>
                     </header>
                     <section class="modal-card-body" id="step_feedback_body">
-                        <!-- Feedback content will be dynamically added here -->
-                    </section>
+                        Feedback content will be dynamically added here -->
+                    <!-- </section>
                     <footer class="modal-card-foot">
                         <button class="button is-success" onclick="viewHint()">View hint</button>
                         <button class="button" onclick="goBack()">Back</button>
                     </footer>
                 </div>
-            </div>
-
-            <!-- Include the necessary FontAwesome library -->
-            <script src="https://kit.fontawesome.com/your-font-awesome-kit.js" crossorigin="anonymous"></script>
+            </div> -->
 
             <style>
             /* CSS styling for the modals */
@@ -335,10 +314,6 @@
                 // Function to generate dropdown items dynamically
                 async function generateDropdownItems() {
 
-                
-
-                    
-
                         try {
                         // Make an HTTP request to the exercise endpoint
                         const response = await fetch('/static/step_process.json');
@@ -350,8 +325,6 @@
 
                         // Parse the response data
                         steps = await response.json();
-
-
 
                     } catch (error) {
                         console.error('Error:', error.message);
@@ -451,17 +424,11 @@
                 document.getElementById('modal_background').removeEventListener('click', closeModal);
             }
 
-            // Function to open the feedback modal
-            function openFeedbackModal(step, feedback) {
-                var feedbackModal = document.getElementById('feedback_modal');
-                var stepTitle = document.getElementById('step_feedback_title');
-                var stepFeedback = document.getElementById('step_feedback_body');
-                stepTitle.textContent = step + ": Feedback";
-                stepFeedback.textContent = feedback;
-                feedbackModal.style.display = 'block';
-                document.getElementById('feedback_modal_background').addEventListener('click', closeFeedbackModal);
+             // Function to close the modal after a slight delay
+            function closeDelayedModal() {
+                setTimeout(closeModal, 50); // Adjust the delay time as needed
             }
-
+            
             // Function to close the feedback modal
             function closeFeedbackModal() {
                 var feedbackModal = document.getElementById('feedback_modal');
@@ -473,13 +440,6 @@
             function viewHint() {
                 appendDummyCodeToEditor();
                 closeFeedbackModal();
-            }
-
-            // Function to go back to the code review modal
-            function goBack() {
-                var feedbackModal = document.getElementById('feedback_modal');
-                feedbackModal.style.display = 'none';
-                openModal();
             }
 
             // Event listener for code review button
@@ -544,18 +504,51 @@
                 closeModal();
             }
 
+            // Function to open the feedback modal
+            function openFeedbackModal(feedback) {
+                var feedbackModal = document.getElementById('code_review_modal');
+                feedbackBody = document.getElementById('step_feedback_body');
+
+                // Update the feedback in the mdoal body
+                feedbackBody.textContent = feedback;
+
+                // Show the feedback modal
+                modal.classList.add('is-active')
+            }
 
             // Function to check step functionality and display feedback
             function checkStepFunctionality() {
                 
-                var selectedStep = document.getElementById('step_dropdown').value;
+                var selectedStep = "Step 1";
                 var feedback = "";
 
-                // Check the selected step and provide corresponding feedback
-                feedback = selectedStep + ": You are the very good coding guy";
+                if (selectedStep == "Step 1") {
+                    feedback = "You have completed Step 1. Great job!"
+                    
+                    // Add a completed flag
+                    var step1Completed = true;
+                } else if (selectedStep == "Step 2") {
+                    feedback = "You have completed Step 2. Well done!"
+
+                    var step2Completed = true;
+                } else {
+                    feedback = "It looks like you're on a different step. Make sure to follow the instructions and complete each step in order."
+                }
 
                 // Open the feedback modal and display the feedback
-                openFeedbackModal(selectedStep, feedback);
+                openFeedbackModal(feedback);
+
+                // Update the step dropdown HTML element
+                var stepDropdown = document.getElementById("dropdown-content");
+
+                // Update the style for each step based on the completed flag
+                if (step1Completed) {
+                    var firstStep = stepDropdown.children[0];
+                    firstStep.style.textDecoration = "line-through";
+                }
+                if (step2Completed) {
+                    stepDropdown.children.style.textDecoration = "line-through";
+                }
             }
             </script>
 
