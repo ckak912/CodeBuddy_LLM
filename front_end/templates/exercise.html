@@ -165,9 +165,9 @@
             <div class="llm_bar">        
                 <a class="button is-medium is-primary" id="help" onclick="generate_help()">Help Me</a>
 
-                <div id="steps_dropdown" class="top-space dropdown is-primary is-outlined is-pulled-right margin-bottom my-5 mt-5" style="width: fit-content;  " onclick="toggleDropdown('steps_dropdown')">
+                <div id="steps_dropdown" class="top-space dropdown is-outlined is-pulled-right margin-bottom my-5 mt-5" style="width: fit-content;  " onclick="toggleDropdown('steps_dropdown')">
                     <div class="dropdown-trigger">
-                        <button class="button is-success has-text-white" aria-haspopup="true" style="padding: 0 100px;">
+                        <button id="tool_button" class="button is-primary has-text-white" aria-haspopup="true" style="padding: 0 100px;">
                             <span>AI Tool</span>
                             <span class="icon-is-small">
                                 <i class="fas fa-angle-down" aria-hidden="true" style="margin-left: 10px"></i>
@@ -176,15 +176,12 @@
                     </div>
                     <div class="dropdown-menu" id="dropdown-menu" role="menu" style="min-width: 100%;">
                         <div class="dropdown-content" id="dropdown-content" style= "max-height: 350px; overflow-y: auto;">
-                            <div class="dropdown-item" style="flex: 1;">
-                                <p style ="text-align: center;"><i>Generated using <span style="font-weight: bold;">GPT-v3.5-turbo</span></i></p>
-                            </div>
-                            <hr class="dropdown-divider" style="flex-basis: 100%; width: 100%;">                       
+                    
                         </div>
                     </div>
                 </div>
 
-                <a class="button is-medium is-primary" id="steps" onclick="generateDropdownItems()">Steps</a>
+                <a class="button is-medium is-dark" id="steps" onclick="generateDropdownItems()">Steps</a>
             </div>
             
 
@@ -308,6 +305,8 @@
 
                 let steps = {};
 
+                let stepComplete = [];
+
                 var count = 1;
 
 
@@ -330,15 +329,32 @@
                         console.error('Error:', error.message);
                     }
 
+
+                    // Update the color of the dropdown menu and the button
+                    var buttonElement = document.getElementById('tool_button');
+                    
+                    if (buttonElement.classList.contains('is-primary')) {
+                        buttonElement.classList.remove('is-primary');
+                    }
+                    buttonElement.classList.add('is-dark');
+
                     var dropdownContent = document.getElementById("dropdown-content");
 
+                    dropdownContent.innerHTML = "";
+
                     Object.entries(steps).forEach(function ([stepNumber, stepContent]) {
+
+                    stepComplete.push(false);  
                     var div = document.createElement("div");
                     div.className = "dropdown-item";
                     div.style.flex = "1";
 
                     var p = document.createElement("p");
                     p.style.textAlign = "justify";
+                    if (stepComplete[stepNumber - 1] === true) {
+                        p.style.textDecoration = "line-through";
+
+                    }
                     p.textContent = stepNumber + ". " + stepContent;
 
                     div.appendChild(p);
@@ -369,6 +385,15 @@
 
                     
                     function generate_help() {
+
+                        // Update the color of the dropdown menu and the button
+                        var buttonElement = document.getElementById('tool_button');
+                        
+                        if (buttonElement.classList.contains('is-dark')) {
+                            buttonElement.classList.remove('is-dark');
+                        }
+                        buttonElement.classList.add('is-primary');
+
                         const dropdownContent = document.getElementById("dropdown-content");
 
                         // Clear existing options
@@ -425,6 +450,7 @@
             function openModal() {
                 var modal = document.getElementById('code_review_modal');
                 modal.style.display = 'block';
+                stepComplete[0] = true;
                 document.getElementById('modal_background').addEventListener('click', closeModal);
             }
 
@@ -501,15 +527,28 @@
 
                 // Show the feedback modal
                 modal.classList.add('is-active')
+
             }
 
             // Function to check step functionality and display feedback
             function checkStepFunctionality() {
                 
                 var selectedStep = "Step 1";
-                var feedback = "";
+                var feedback = 'You have completed Step 1. Great job! \n'/*  + 
+                                'Step 2 is incomplete \n' + 
+                                'Step 3 is incomplete \n' +
+                                'Step 4 is incomplete \n' +
+                                'Step 5 is incomplete \n' +
+                                'Step 6 is incomplete \n'+
+                                'Step 7 is incomplete \n' +
+                                'Step 8 is incomplete \n' +
+                                'Step 9 is incomplete \n' +
+                                'Step 10 is incomplete \n' +
+                                'Step 11 is incomplete \n' +
+                                'Step 12 is incomplete \n' +
+                                'Step 13 is incomplete' */;
 
-                if (selectedStep == "Step 1") {
+/*                 if (selectedStep == "Step 1") {
                     feedback = "You have completed Step 1. Great job!"
                     
                     // Add a completed flag
@@ -520,22 +559,22 @@
                     var step2Completed = true;
                 } else {
                     feedback = "It looks like you're on a different step. Make sure to follow the instructions and complete each step in order."
-                }
+                } */
 
                 // Open the feedback modal and display the feedback
                 openFeedbackModal(feedback);
 
                 // Update the step dropdown HTML element
-                var stepDropdown = document.getElementById("dropdown-content");
+                //var stepDropdown = document.getElementById("dropdown-content");
 
                 // Update the style for each step based on the completed flag
-                if (step1Completed) {
+/*                 if (step1Completed) {
                     var firstStep = stepDropdown.children[0];
                     firstStep.style.textDecoration = "line-through";
                 }
                 if (step2Completed) {
                     stepDropdown.children.style.textDecoration = "line-through";
-                }
+                } */
             }
             </script>
 
