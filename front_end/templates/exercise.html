@@ -309,27 +309,27 @@
 
                 var count = 1;
 
-
                 // Function to generate dropdown items dynamically
-                async function generateDropdownItems() {
+                // async function generateDropdownItems() {
 
-                        try {
-                        // Make an HTTP request to the exercise endpoint
-                        const response = await fetch('/exercise_steps');
+                //         try {
+                //         // Make an HTTP request to the exercise endpoint
+                //         const response = await fetch('/exercise_steps');
 
-                        // Check the response status
-                        if (!response.ok) {
-                        throw new Error('Failed to fetch exercise data');
-                        }
+                //         // Check the response status
+                //         if (!response.ok) {
+                //         throw new Error('Failed to fetch exercise data');
+                //         }
 
-                        // Parse the response data
-                        steps = await response.json();
+                //         // Parse the response data
+                //         steps = await response.json();
 
-                    } catch (error) {
-                        console.error('Error:', error.message);
-                    }
+                //     } catch (error) {
+                //         console.error('Error:', error.message);
+                //     }
 
-
+                function generateDropdownItems() {
+                    
                     // Update the color of the dropdown menu and the button
                     var buttonElement = document.getElementById('tool_button');
                     
@@ -341,6 +341,22 @@
                     var dropdownContent = document.getElementById("dropdown-content");
 
                     dropdownContent.innerHTML = "";
+
+                    $.ajax({
+                        type: 'GET',
+                        url: "/exercise_steps/",
+                        })
+                        .done(function(message) {
+                            if (message.startsWith("Error:")) {
+                                $("#leave_error_message").removeClass("invisible");
+                                $("#leave_error_message")[0].innerHTML = `<div class="message-body">${message}</div>`;
+                            }
+                        })
+                        .fail(function(error) {
+                                $("#leave_error_message").removeClass("invisible");
+                            $("#leave_error_message")[0].innerHTML = `<div class="message-body">${error}</div>`;
+                        });
+                    }
 
                     Object.entries(steps).forEach(function ([stepNumber, stepContent]) {
 
@@ -367,10 +383,10 @@
 
                     dropdownContent.appendChild(hr);
                     });
+                    // stepDropdown.innerHTML = ""; // Clear existing options
 
                     // Generate dropdown items
                     var stepDropdown = document.getElementById("step_dropdown");
-                    stepDropdown.innerHTML = ""; // Clear existing options
 
                     Object.keys(steps).forEach(function (stepNumber) {
                     var option = document.createElement("option");
@@ -379,11 +395,6 @@
                     stepDropdown.appendChild(option);
                     });
 
-                        
-                    } 
-
-
-                    
                     function generate_help() {
 
                         // Update the color of the dropdown menu and the button
