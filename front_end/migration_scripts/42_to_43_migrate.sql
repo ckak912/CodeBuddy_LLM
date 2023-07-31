@@ -1,5 +1,5 @@
-CREATE TABLE "exercises2" (
-    exercise_steps integer NOT NULL,
+CREATE TABLE exercises2 (
+  exercise_steps text NOT NULL,
 	course_id integer NOT NULL,
 	assignment_id integer NOT NULL,
 	exercise_id integer,
