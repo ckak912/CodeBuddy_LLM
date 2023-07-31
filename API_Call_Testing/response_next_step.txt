@@ -1,0 +1,8 @@
+Loop through the grades array:
+   - For each grade in grades:
+      - Add the grade to the sum variable
+
+Calculate the average grade:
+   - Divide the sum by the length of the grades array
+
+Return the average grade
