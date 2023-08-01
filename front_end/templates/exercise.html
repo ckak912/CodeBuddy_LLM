@@ -328,7 +328,7 @@
                 //         console.error('Error:', error.message);
                 //     }
 
-                function generateDropdownItems() {
+                function generateDropdownItems(exercise_id) {
                     
                     // Update the color of the dropdown menu and the button
                     var buttonElement = document.getElementById('tool_button');
@@ -344,7 +344,7 @@
 
                     $.ajax({
                         type: 'GET',
-                        url: "/exercise_steps/",
+                        url: "/exercise_steps/{exercise_id}",
                         })
                         .done(function(message) {
                             if (message.startsWith("Error:")) {

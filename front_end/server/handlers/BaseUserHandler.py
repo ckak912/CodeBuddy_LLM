@@ -54,6 +54,11 @@ class BaseUserHandler(BaseRequestHandler):
     # for course-related data.
     ####################################################
 
+    # Fetches exercise steps data for the given exercise_id, caches it using a unique cache key,
+    # and ensures future requests for the same exercise_id return the cached data if available.
+    async def get_exercise_steps(self, exercise_id):
+        return self.update_cached_variable(str(exercise_id), f"exercise_steps_{exercise_id}", self.content.get_exercise_steps, exercise_id)
+    
     async def get_course_basics(self, course_id):
         return self.update_cached_variable(str(course_id), f"course_basics_{course_id}", self.content.get_course_basics, course_id)
     

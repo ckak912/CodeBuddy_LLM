@@ -1,8 +1,12 @@
 from BaseUserHandler import *
 
 class ExerciseStepsHandler(BaseUserHandler):
-    async def get(self):
+    async def get(self, exercise_id):
         try:
+            # Fetch exercise steps from the database
+            exercise_steps = await self.get_exercise_steps(exercise_id)
+
+            print(exercise_steps)
             OPENAI_API_KEY = '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'
             API_URL = 'https://api.openai.com/v1/chat/completions'
             model_role = 'Your role is that of a lecturer for an introductory programming course for 1st year university students. You never give out complete answers, you only provide hints.'
@@ -31,9 +35,21 @@ class ExerciseStepsHandler(BaseUserHandler):
 
             Your task is to implement the required functions and main program to achieve the above functionality. Ensure that the program handles invalid inputs gracefully and provides appropriate error messages.
             '''
+
             model_prompt = '''
             As a lecturer, your task is to devise a step by step process for your students that encapsulates the above description. 
             The steps should be in chronological order with an efficient way to complete the task. Ensure that the sub-steps are in concise paragraphs rather than bullet points. Each step is numbered (e.g. 1. , 2. , 3.)
+            '''
+
+            # Append the retrieved exercise steps to the prompt
+            model_prompt = f'''
+            {model_role}
+
+            {model_task_description}
+
+            {exercise_steps}
+
+            {model_prompt}
             '''
 
             headers = {
