@@ -227,6 +227,7 @@
                     <section class="modal-card-body" id="step_feedback_body"></section>
                     <footer class="modal-card-foot">
                         <button class="button" onclick="closeModal()">Back</button>
+                        <button class="button" onclick="updateModal()">Update Feedback</button>
                     </footer>
                 </div>
             </div>
@@ -315,7 +316,7 @@
 
                         try {
                         // Make an HTTP request to the exercise endpoint
-                        const response = await fetch('/exercise_steps');
+                        const response = await fetch('/static/step_process.json');
 
                         // Check the response status
                         if (!response.ok) {
@@ -368,15 +369,24 @@
                     dropdownContent.appendChild(hr);
                     });
 
-                    // Generate dropdown items
-                    var stepDropdown = document.getElementById("step_dropdown");
-                    stepDropdown.innerHTML = ""; // Clear existing options
+                    // Generate modal body content
+                    var modalBody = document.getElementById("step_feedback_body");
+                    modalBody.innerHTML = ""; // Clear existing content
 
                     Object.keys(steps).forEach(function (stepNumber) {
-                    var option = document.createElement("option");
-                    option.value = "Step " + stepNumber;
-                    option.textContent = "Step " + stepNumber;
-                    stepDropdown.appendChild(option);
+                    var paragraph = document.createElement("strong");
+                    paragraph.textContent = "Step " + stepNumber + " Feedback:";
+                    modalBody.appendChild(paragraph);
+
+                    var content = document.createElement("p");
+                    content.textContent = steps[stepNumber];
+                    content.id = "step" + stepNumber + "_content"; // Assign a unique ID for each step's content
+                    modalBody.appendChild(content);
+
+
+                    var divider = document.createElement("hr");
+                    modalBody.appendChild(divider);
+
                     });
 
                         
@@ -461,6 +471,14 @@
                 document.getElementById('modal_background').removeEventListener('click', closeModal);
             }
 
+
+            // Function to update feedback
+            function updateModal() {
+                // To change the feedback for Step 11
+                var step11Content = document.getElementById("step11_content");
+                step11Content.textContent = "This is the updated feedback for Step 11.";
+            }
+
              // Function to close the modal after a slight delay
             function closeDelayedModal() {
                 setTimeout(closeModal, 50); // Adjust the delay time as needed
@@ -518,12 +536,7 @@
             // }
 
             // Function to open the feedback modal
-            function openFeedbackModal(feedback) {
-                var feedbackModal = document.getElementById('code_review_modal');
-                feedbackBody = document.getElementById('step_feedback_body');
-
-                // Update the feedback in the mdoal body
-                feedbackBody.textContent = feedback;
+            function openFeedbackModal() {
 
                 // Show the feedback modal
                 modal.classList.add('is-active')
