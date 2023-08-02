@@ -1,81 +1,107 @@
 from BaseUserHandler import *
+from content import Content
+import json
+
+#TODO: use the openAI API to get the steps. Store these steps in the database
+    # parse the secrets.yaml to get the api key. DONE
+    # If the steps are already available, retrieve them from the database using retrieve_llm_steps() DONE
+    # This get function in the handler should have multiple arguments DONE
+    # MAKE SURE THE PATH IN webserver.py MATCHES THE PATH HERE
 
 class ExerciseStepsHandler(BaseUserHandler):
-    async def get(self, exercise_id):
+    async def get(self, exercise_steps, exercise_id, course_id, assignment_id):
         try:
-            # Fetch exercise steps from the database
-            exercise_steps = await self.get_exercise_steps(exercise_id)
 
-            print(exercise_steps)
-            OPENAI_API_KEY = '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'
-            API_URL = 'https://api.openai.com/v1/chat/completions'
-            model_role = 'Your role is that of a lecturer for an introductory programming course for 1st year university students. You never give out complete answers, you only provide hints.'
-            model_task_description = '''
-            Here's a task description that incorporates the concepts of arrays, data structures, conditional statements, and loops using functions and user input:
+            content = Content()
 
-            Task: Student Grade Calculator
+            # Check if exercise_steps are available in the database (function from content.py)
+            exercise_steps = await content.retrieve_llm_step(exercise_steps)
+            
+            # if not available, make the API call to OpenAI
+            if not exercise_steps:
+            
+                # get the api key from secrets.yaml
+                secrets_dict = load_yaml_dict(read_file("secrets/front_end.yaml"))
+                OPEN_AI_API_KEY = secrets_dict["openAI_api_key"]
 
-            Description:
-            You are tasked with creating a program that calculates the average grade of a student based on their individual subject grades. The program should take inputs from the user, calculate the average grade, and provide feedback based on the average grade obtained.
+                API_URL = 'https://api.openai.com/v1/chat/completions'
+                model_role = 'Your role is that of a lecturer for an introductory programming course for 1st year university students. You never give out complete answers, you only provide hints.'
+                model_task_description = '''
+                Here's a task description that incorporates the concepts of arrays, data structures, conditional statements, and loops using functions and user input:
 
-            Requirements:
+                Task: Student Grade Calculator
 
-            Implement a function called calculate_average_grade that takes an array of subject grades as input.
-            The grades are represented as integers ranging from 0 to 100.
-            The function should calculate and return the average grade.
-            Implement a function called provide_feedback that takes the average grade as input.
-            Based on the average grade, the function should provide feedback according to the following criteria:
-            If the average grade is below 40, print "You need to improve your performance."
-            If the average grade is between 40 and 70 (both inclusive), print "Your performance is satisfactory."
-            If the average grade is above 70, print "You have excelled in your studies."
-            Implement a main program that prompts the user to enter the number of subjects they have grades for.
-            Based on the number of subjects, the program should prompt the user to enter the grades for each subject.
-            The program should call the calculate_average_grade function with the grades as input and store the result.
-            Finally, the program should call the provide_feedback function with the average grade as input and display the feedback to the user.
+                Description:
+                You are tasked with creating a program that calculates the average grade of a student based on their individual subject grades. The program should take inputs from the user, calculate the average grade, and provide feedback based on the average grade obtained.
 
-            Your task is to implement the required functions and main program to achieve the above functionality. Ensure that the program handles invalid inputs gracefully and provides appropriate error messages.
-            '''
+                Requirements:
 
-            model_prompt = '''
-            As a lecturer, your task is to devise a step by step process for your students that encapsulates the above description. 
-            The steps should be in chronological order with an efficient way to complete the task. Ensure that the sub-steps are in concise paragraphs rather than bullet points. Each step is numbered (e.g. 1. , 2. , 3.)
-            '''
+                Implement a function called calculate_average_grade that takes an array of subject grades as input.
+                The grades are represented as integers ranging from 0 to 100.
+                The function should calculate and return the average grade.
+                Implement a function called provide_feedback that takes the average grade as input.
+                Based on the average grade, the function should provide feedback according to the following criteria:
+                If the average grade is below 40, print "You need to improve your performance."
+                If the average grade is between 40 and 70 (both inclusive), print "Your performance is satisfactory."
+                If the average grade is above 70, print "You have excelled in your studies."
+                Implement a main program that prompts the user to enter the number of subjects they have grades for.
+                Based on the number of subjects, the program should prompt the user to enter the grades for each subject.
+                The program should call the calculate_average_grade function with the grades as input and store the result.
+                Finally, the program should call the provide_feedback function with the average grade as input and display the feedback to the user.
 
-            # Append the retrieved exercise steps to the prompt
-            model_prompt = f'''
-            {model_role}
+                Your task is to implement the required functions and main program to achieve the above functionality. Ensure that the program handles invalid inputs gracefully and provides appropriate error messages.
+                '''
 
-            {model_task_description}
+                model_prompt = '''
+                As a lecturer, your task is to devise a step by step process for your students that encapsulates the above description. 
+                The steps should be in chronological order with an efficient way to complete the task. Ensure that the sub-steps are in concise paragraphs rather than bullet points. Each step is numbered (e.g. 1. , 2. , 3.)
+                '''
 
-            {exercise_steps}
+                # Append the retrieved exercise steps to the prompt
+                model_prompt = f'''
+                {model_role}
 
-            {model_prompt}
-            '''
+                {model_task_description}
 
-            headers = {
-                'Content-Type': 'application/json',
-                'Authorization': f'Bearer {OPENAI_API_KEY}'
-            }
+                {exercise_steps}
 
-            data = {
-                'model': 'gpt-3.5-turbo',
-                'messages': [{'role': 'user', 'content': f'{model_role}\n\n{model_task_description}\n\n{model_prompt}'}],
-                'temperature': 0.7
-            }
+                {model_prompt}
+                '''
 
-            session = requests.Session()
-            response = session.post(API_URL, headers=headers, json=data)
-            result = response.json()
+                headers = {
+                    'Content-Type': 'application/json',
+                    'Authorization': f'Bearer {OPEN_AI_API_KEY}'
+                }
 
-            # Extract step numbers and content using regex
-            regex = r'(?:^|\n)(\d+)\.\s+(.*)'
-            steps = {}
-            for match in re.finditer(regex, result['choices'][0]['message']['content']):
-                step_number = match.group(1)
-                step_content = match.group(2)
-                steps[step_number] = step_content.strip()
+                data = {
+                    'model': 'gpt-3.5-turbo',
+                    'messages': [{'role': 'user', 'content': f'{model_role}\n\n{model_task_description}\n\n{model_prompt}'}],
+                    'temperature': 0.7
+                }
 
-            self.write(steps)
+                session = requests.Session()
+                response = session.post(API_URL, headers=headers, json=data)
+                result = response.json()
+
+                # Extract step numbers and content using regex
+                regex = r'(?:^|\n)(\d+)\.\s+(.*)'
+                steps = {}
+                for match in re.finditer(regex, result['choices'][0]['message']['content']):
+                    step_number = match.group(1)
+                    step_content = match.group(2)
+                    steps[step_number] = step_content.strip()
+
+                # Serialize the obtained steps into JSON format
+                exercise_steps_json = json.dumps(steps)
+
+                # Store the obtained steps in the database using store_llm_step in content.py
+                await content.store_llm_step(exercise_id, exercise_steps_json)
+
+            else:
+                #  If exercise_steps are available in the database, parse the JSON data
+                exercise_steps = json.loads(exercise_steps)
+
+            self.write(exercise_steps)
 
         except Exception as inst:
             self.set_status(500)

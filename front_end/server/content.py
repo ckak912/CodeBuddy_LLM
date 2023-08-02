@@ -584,6 +584,42 @@ class Content:
                 registered_courses.append([course["course_id"], course_basics])
 
         return registered_courses
+    
+    # This function contains the SQL logic for storing steps after you have retrieved them from OpenAI
+    def store_llm_step(self, exercise_steps, exercise_id, course_id, assignment_id):
+      # Serialize the exercise steps into JSON format
+      exercise_steps_json = json.dumps(exercise_steps)
+
+      # Connect to the database
+      conn = sqlite3.connect("CodeBuddy.db")
+      cursor = conn.cursor()
+
+      # Update or insert the exercise_steps for the specified exercise_id, course_id, and assignment_id
+      cursor.execute("INSERT OR REPLACE INTO LLM_stuff (exercise_id, course_id, assignment_id, exercise_steps) VALUES (?, ?, ?, ?)",
+                    (exercise_id, course_id, assignment_id, exercise_steps_json))
+
+      # Commit the changes and close the connection
+      conn.commit()
+      conn.close()
+       
+    def retrieve_llm_step(self, exercise_steps, exercise_id, course_id, assignment_id):
+        # Connect to the database
+        conn = sqlite3.connect("CodeBuddy.db")
+        cursor = conn.cursor()
+
+        # Retrieve the exercise_steps for the specified exercise_id, course_id, and assignment_id
+        cursor.execute("SELECT exercise_steps FROM LLM_stuff WHERE exercise_id = ? AND course_id = ? AND assignment_id = ?",
+                       (exercise_id, course_id, assignment_id))
+        result = cursor.fetchone()
+
+        # Close the connection
+        conn.close()
+
+        # If exercise_steps are found, return the JSON string directly
+        if result and result[0]:
+            return result[0]
+
+        return None
 
     # TODO: This function could probably be removed. get_exercise_statuses could be used in its place.
     def get_exercises(self, course_basics, assignment_basics, show_hidden=True):

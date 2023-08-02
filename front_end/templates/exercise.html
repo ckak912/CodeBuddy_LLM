@@ -181,7 +181,7 @@
                     </div>
                 </div>
 
-                <a class="button is-medium is-dark" id="steps" onclick="generateDropdownItems()">Steps</a>
+                <a class="button is-medium is-dark" id="steps" onclick="generateDropdownItems('${course_id}', '${assignment_id}', '${exercise_id}')">Steps</a>
             </div>
             
 
@@ -309,26 +309,7 @@
 
                 var count = 1;
 
-                // Function to generate dropdown items dynamically
-                // async function generateDropdownItems() {
-
-                //         try {
-                //         // Make an HTTP request to the exercise endpoint
-                //         const response = await fetch('/exercise_steps');
-
-                //         // Check the response status
-                //         if (!response.ok) {
-                //         throw new Error('Failed to fetch exercise data');
-                //         }
-
-                //         // Parse the response data
-                //         steps = await response.json();
-
-                //     } catch (error) {
-                //         console.error('Error:', error.message);
-                //     }
-
-                function generateDropdownItems(exercise_id) {
+                function generateDropdownItems(course_id, assignment_id, exercise_id) {
                     
                     // Update the color of the dropdown menu and the button
                     var buttonElement = document.getElementById('tool_button');
@@ -344,12 +325,25 @@
 
                     $.ajax({
                         type: 'GET',
-                        url: "/exercise_steps/{exercise_id}",
+                        url: `/exercise_steps/${course_id}/${assignment_id}/${exercise_id}`,
+                        })
+                        .done(function (response) {
+                            var steps = JSON.parse(response);
                         })
                         .done(function(message) {
                             if (message.startsWith("Error:")) {
                                 $("#leave_error_message").removeClass("invisible");
                                 $("#leave_error_message")[0].innerHTML = `<div class="message-body">${message}</div>`;
+
+                                // Generate dropdown items
+                                var stepDropdown = document.getElementById("step_dropdown");
+
+                                Object.keys(steps).forEach(function (stepNumber) {
+                                var option = document.createElement("option");
+                                option.value = "Step " + stepNumber;
+                                option.textContent = "Step " + stepNumber;
+                                stepDropdown.appendChild(option);
+                                });
                             }
                         })
                         .fail(function(error) {
@@ -382,17 +376,6 @@
                     hr.style.width = "100%";
 
                     dropdownContent.appendChild(hr);
-                    });
-                    // stepDropdown.innerHTML = ""; // Clear existing options
-
-                    // Generate dropdown items
-                    var stepDropdown = document.getElementById("step_dropdown");
-
-                    Object.keys(steps).forEach(function (stepNumber) {
-                    var option = document.createElement("option");
-                    option.value = "Step " + stepNumber;
-                    option.textContent = "Step " + stepNumber;
-                    stepDropdown.appendChild(option);
                     });
 
                     function generate_help() {
@@ -452,7 +435,7 @@
 
                 // Wait for the DOM to be fully loaded
                 document.addEventListener("DOMContentLoaded", function () {
-                    generateDropdownItems();
+                    generateDropdownItems('${course_id}', '${assignment_id}', '${exercise_id}')                
                 });
             </script>
 
