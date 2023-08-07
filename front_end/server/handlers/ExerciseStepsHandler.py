@@ -9,13 +9,13 @@ import json
     # MAKE SURE THE PATH IN webserver.py MATCHES THE PATH HERE
 
 class ExerciseStepsHandler(BaseUserHandler):
-    async def get(self, exercise_steps, exercise_id, course_id, assignment_id):
+    async def get(self, exercise_steps_json, course_id, assignment_id, exercise_id):
         try:
 
             content = Content()
 
             # Check if exercise_steps are available in the database (function from content.py)
-            exercise_steps = await content.retrieve_llm_step(exercise_steps)
+            exercise_steps = await content.retrieve_llm_step(exercise_id, course_id, assignment_id)
             
             # if not available, make the API call to OpenAI
             if not exercise_steps:
@@ -95,7 +95,7 @@ class ExerciseStepsHandler(BaseUserHandler):
                 exercise_steps_json = json.dumps(steps)
 
                 # Store the obtained steps in the database using store_llm_step in content.py
-                await content.store_llm_step(exercise_id, exercise_steps_json)
+                await content.store_llm_step(exercise_steps_json, exercise_id, course_id, assignment_id)
 
             else:
                 #  If exercise_steps are available in the database, parse the JSON data
