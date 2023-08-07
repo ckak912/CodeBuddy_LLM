@@ -1,4 +1,4 @@
-const OPENAI_API_KEY = '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';
+const OPENAI_API_KEY = '';
 const apiUrl = 'https://api.openai.com/v1/chat/completions';
 /* const model_role = 'Your role is that of a lecturer for an introductory programming course for 1st year university students. You never give out complete answers, you only provide hints.'
 
@@ -68,7 +68,7 @@ fetch(apiUrl, {
     const apiResponse = result.choices[0].message.content;
 
     // Specify the file path and name where the response will be saved
-    const filePath = 'response_grades.txt';
+    const filePath = 'response_full_solution.txt';
 
     // Write the response to the file
     fs.writeFile(filePath, apiResponse, (err) => {

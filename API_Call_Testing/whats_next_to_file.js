@@ -1,4 +1,4 @@
-const OPENAI_API_KEY = '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';
+const OPENAI_API_KEY = '';
 const apiUrl = 'https://api.openai.com/v1/chat/completions';
 
 

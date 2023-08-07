@@ -1,0 +1,52 @@
+# Step 1: Define the calculate_average_grade function
+def calculate_average_grade(subject_grades):
+    # Step 2: Calculate the sum of the grades
+    grade_sum = 0
+    for grade in subject_grades:
+        grade_sum += grade
+    
+    # Step 2: Calculate the average grade
+    average_grade = grade_sum / len(subject_grades)
+    
+    # Step 2: Return the average grade
+    return average_grade
+
+# Step 3: Define the provide_feedback function
+def provide_feedback(average_grade):
+    # Step 4: Provide feedback based on the average grade
+    if average_grade < 40:
+        print("You need to improve your performance.")
+    elif average_grade >= 40 and average_grade <= 70:
+        print("Your performance is satisfactory.")
+    else:
+        print("You have excelled in your studies.")
+
+# Step 5: Implement the main program
+def main():
+    # Step 5: Prompt the user to enter the number of subjects
+    num_subjects = int(input("Enter the number of subjects: "))
+    
+    # Step 6: Create an empty array to hold the grades
+    subject_grades = []
+    
+    # Step 7: Prompt the user to enter the grades for each subject
+    for i in range(num_subjects):
+        while True:
+            try:
+                grade = int(input("Enter the grade for subject {}: ".format(i+1)))
+                if grade < 0 or grade > 100:
+                    raise ValueError
+                break
+            except ValueError:
+                print("Invalid input. Please enter a valid grade between 0 and 100.")
+        
+        subject_grades.append(grade)
+    
+    # Step 8: Call the calculate_average_grade function
+    average_grade = calculate_average_grade(subject_grades)
+    
+    # Step 9: Call the provide_feedback function
+    provide_feedback(average_grade)
+
+# Step 10: Test the program
+main()
