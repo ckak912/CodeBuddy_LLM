@@ -9,8 +9,9 @@ import json
     # MAKE SURE THE PATH IN webserver.py MATCHES THE PATH HERE
 
 class ExerciseStepsHandler(BaseUserHandler):
-    async def get(self, exercise_steps_json, course_id, assignment_id, exercise_id):
+    async def get(self, course_id, assignment_id, exercise_id):
         try:
+            exercise_steps_json = self.get_argument("exercise_steps_json")
 
             content = Content()
 

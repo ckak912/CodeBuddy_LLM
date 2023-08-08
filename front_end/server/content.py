@@ -586,18 +586,16 @@ class Content:
         return registered_courses
 
     def retrieve_llm_step(self, exercise_id, course_id, assignment_id):
-        
-        # Retrieve the exercise_steps for the specified exercise_id, course_id, and assignment_id
-        sql = '''SELECT exercise_steps FROM LLM_stuff WHERE exercise_id = ? AND course_id = ? AND assignment_id = ?''',
-        (exercise_id, course_id, assignment_id)
+    # Retrieve the exercise_steps for the specified exercise_id, course_id, and assignment_id
+      sql = '''SELECT exercise_steps FROM LLM_stuff WHERE exercise_id = ? AND course_id = ? AND assignment_id = ?'''
+      result = self.fetchall(sql, (exercise_id, course_id, assignment_id))
 
-        result = self.fetchall(sql, (exercise_id, course_id, assignment_id))
+      # If exercise_steps are found, return the JSON string directly
+      if result and result[0]:
+          return result[0]
 
-        # If exercise_steps are found, return the JSON string directly
-        if result and result[0]:
-            return result[0]
+      return None
 
-        return None
         
     # This function contains the SQL logic for storing steps after you have retrieved them from OpenAI
     def store_llm_step(self, exercise_id, course_id, assignment_id, exercise_steps_json):

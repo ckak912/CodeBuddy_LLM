@@ -181,7 +181,7 @@
                     </div>
                 </div>
 
-                <a class="button is-medium is-dark" id="steps">Steps</a>
+                <a class="button is-medium is-dark" id="steps" onclick="generateDropdownItems('${course_id}', '${assignment_id}', '${exercise_id}')">Steps</a>
             </div>
             
 
@@ -323,34 +323,37 @@
 
                     dropdownContent.innerHTML = "";
 
-                    $.ajax({
-                        type: 'GET',
-                        url: `/exercise_steps/${course_id}/${assignment_id}/${exercise_id}`,
-                        })
-                        .done(function (response) {
-                            var steps = JSON.parse(response);
-                        })
-                        .done(function(message) {
-                            if (message.startsWith("Error:")) {
-                                $("#leave_error_message").removeClass("invisible");
-                                $("#leave_error_message")[0].innerHTML = `<div class="message-body">${message}</div>`;
+                    var stepsButton = document.getElementById("steps");
 
-                                // Generate dropdown items
-                                var stepDropdown = document.getElementById("step_dropdown");
+                    stepsButton.onclick = function() {
+                        $.ajax({
+                            type: 'GET',
+                            url: "/exercise_steps/${course_id}/${assignment_id}/${exercise_id}",
+                            })
+                            .done(function(response) {
 
-                                Object.keys(steps).forEach(function (stepNumber) {
-                                var option = document.createElement("option");
-                                option.value = "Step " + stepNumber;
-                                option.textContent = "Step " + stepNumber;
-                                stepDropdown.appendChild(option);
-                                });
-                            }
-                        })
-                        .fail(function(error) {
-                                $("#leave_error_message").removeClass("invisible");
-                            $("#leave_error_message")[0].innerHTML = `<div class="message-body">${error}</div>`;
-                        });
-                    }
+                                var steps = JSON.parse(response);
+
+                                if (message.startsWith("Error:")) {
+                                    $("#leave_error_message").removeClass("invisible");
+                                    $("#leave_error_message")[0].innerHTML = `<div class="message-body">${message}</div>`;
+
+                                    // Generate dropdown items
+                                    var stepDropdown = document.getElementById("step_dropdown");
+    
+                                    Object.keys(steps).forEach(function (stepNumber) {
+                                    var option = document.createElement("option");
+                                    option.value = "Step " + stepNumber;
+                                    option.textContent = "Step " + stepNumber;
+                                    stepDropdown.appendChild(option);
+                                    });
+                                }
+                            })
+                            .fail(function(error) {
+                                    $("#leave_error_message").removeClass("invisible");
+                                $("#leave_error_message")[0].innerHTML = `<div class="message-body">${error}</div>`;
+                            });
+                        }
 
                     Object.entries(steps).forEach(function ([stepNumber, stepContent]) {
 
@@ -376,7 +379,7 @@
                     hr.style.width = "100%";
 
                     dropdownContent.appendChild(hr);
-                    });
+                    })};
 
                     function generate_help() {
 
