@@ -1,4 +1,4 @@
 CREATE TABLE LLM_stuff (
-    exercise_steps JSON NOT NULL DEFAULT '{}'
+    exercise_feedback JSON NOT NULL DEFAULT '{}'
 );
 

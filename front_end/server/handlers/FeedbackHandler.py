@@ -8,19 +8,16 @@ import json
     # This get function in the handler should have multiple arguments DONE
     # MAKE SURE THE PATH IN webserver.py MATCHES THE PATH HERE
 
-class ExerciseStepsHandler(BaseUserHandler):
+class FeedbackHandler(BaseUserHandler):
     async def get(self, course_id, assignment_id, exercise_id):
         try:
-            exercise_steps_json = self.get_argument("exercise_steps_json")
-
-            content = Content()
-
             # Check if exercise_steps are available in the database (function from content.py)
-            exercise_steps = await content.retrieve_llm_step(exercise_id, course_id, assignment_id)
+            exercise_steps = await self.content.retrieve_llm_step(exercise_id, course_id, assignment_id) #should be self.content
             
+            print("Exercise Steps:", exercise_steps)
             # if not available, make the API call to OpenAI
             if not exercise_steps:
-            
+                
                 # get the api key from secrets.yaml
                 secrets_dict = load_yaml_dict(read_file("secrets/front_end.yaml"))
                 OPEN_AI_API_KEY = secrets_dict["openAI_api_key"]
@@ -80,6 +77,8 @@ class ExerciseStepsHandler(BaseUserHandler):
                     'temperature': 0.7
                 }
 
+                print(response)
+
                 session = requests.Session()
                 response = session.post(API_URL, headers=headers, json=data)
                 result = response.json()
@@ -96,11 +95,19 @@ class ExerciseStepsHandler(BaseUserHandler):
                 exercise_steps_json = json.dumps(steps)
 
                 # Store the obtained steps in the database using store_llm_step in content.py
-                await content.store_llm_step(exercise_steps_json, exercise_id, course_id, assignment_id)
+                await self.content.store_llm_step(exercise_steps_json, exercise_id, course_id, assignment_id)
+
+                print("Exercise Steps JSON: ", exercise_steps_json)
+                print("Steps after OpenAI call: ", exercise_steps)
 
             else:
+                print("Exercise steps found in the database.")
+
+
                 #  If exercise_steps are available in the database, parse the JSON data
-                exercise_steps = json.loads(exercise_steps)
+                exercise_steps = json.loads(exercise_steps_json)
+
+                print("Processed Exercise Steps: ", exercise_steps)
 
             self.write(exercise_steps)
 

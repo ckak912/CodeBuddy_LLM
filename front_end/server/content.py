@@ -584,10 +584,10 @@ class Content:
                 registered_courses.append([course["course_id"], course_basics])
 
         return registered_courses
-
-    def retrieve_llm_step(self, exercise_id, course_id, assignment_id):
+    # CHANGE THIS TO FEEDBACK STUFF
+    def retrieve_llm_feedback(self, exercise_id, course_id, assignment_id):
     # Retrieve the exercise_steps for the specified exercise_id, course_id, and assignment_id
-      sql = '''SELECT exercise_steps FROM LLM_stuff WHERE exercise_id = ? AND course_id = ? AND assignment_id = ?'''
+      sql = '''SELECT exercise_feedback FROM LLM_stuff WHERE exercise_id = ? AND course_id = ? AND assignment_id = ?''' #this needs to be stored in the table too
       result = self.fetchall(sql, (exercise_id, course_id, assignment_id))
 
       # If exercise_steps are found, return the JSON string directly
@@ -596,18 +596,18 @@ class Content:
 
       return None
 
-        
+    # FEEDBACK STUFF
     # This function contains the SQL logic for storing steps after you have retrieved them from OpenAI
-    def store_llm_step(self, exercise_id, course_id, assignment_id, exercise_steps_json):
+    def store_llm_feedback(self, exercise_id, course_id, assignment_id, exercise_feedback_json):
 
       # Serialize the exercise steps into JSON format
-      exercise_steps_json_str = [json.dumps(exercise_steps_json)]
+      exercise_steps_json_str = [json.dumps(exercise_feedback_json)]
       
-      sql = '''INSERT OR REPLACE INTO LLM_STUFF (exercise_id, course_id, assignment_id, exercise_steps)
+      sql = '''INSERT OR REPLACE INTO LLM_STUFF (exercise_id, course_id, assignment_id, exercise_feedback)
                 VALUES (?, ?, ?, ?)''',
       (exercise_id, course_id, assignment_id, exercise_steps_json_str)
 
-      result = self.fetchall(sql, (exercise_id, course_id, assignment_id, ))
+      result = self.execute(sql, (exercise_id, course_id, assignment_id, )) # use execute
 
       if result and result[0]:
           return result[0]

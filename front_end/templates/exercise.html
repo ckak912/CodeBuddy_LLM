@@ -181,7 +181,7 @@
                     </div>
                 </div>
 
-                <a class="button is-medium is-dark" id="steps" onclick="generateDropdownItems('${course_id}', '${assignment_id}', '${exercise_id}')">Steps</a>
+                <a class="button is-medium is-dark" id="steps">Steps</a>
             </div>
             
 
@@ -328,7 +328,8 @@
                     stepsButton.onclick = function() {
                         $.ajax({
                             type: 'GET',
-                            url: "/exercise_steps/${course_id}/${assignment_id}/${exercise_id}",
+                            //CHANGE EXERCISE STEPS TO FEEDBACK
+                            url: `/exercise_feedback/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}/{{ exercise_basics['id'] }}`, 
                             })
                             .done(function(response) {
 
@@ -438,7 +439,7 @@
 
                 // Wait for the DOM to be fully loaded
                 document.addEventListener("DOMContentLoaded", function () {
-                    generateDropdownItems('${course_id}', '${assignment_id}', '${exercise_id}')                
+                    generateDropdownItems('${course_id}', '${assignment_id}', '${exercise_id}') // fix this         
                 });
             </script>
 
