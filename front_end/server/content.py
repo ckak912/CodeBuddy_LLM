@@ -584,10 +584,14 @@ class Content:
                 registered_courses.append([course["course_id"], course_basics])
 
         return registered_courses
-    # CHANGE THIS TO FEEDBACK STUFF
+    
     def retrieve_llm_feedback(self, exercise_id, course_id, assignment_id):
     # Retrieve the exercise_steps for the specified exercise_id, course_id, and assignment_id
-      sql = '''SELECT exercise_feedback FROM LLM_stuff WHERE exercise_id = ? AND course_id = ? AND assignment_id = ?''' #this needs to be stored in the table too
+      sql = '''SELECT EF.exercise_feedback, E.assignment_id, E.course_id 
+                FROM LLM_stuff as EF
+                JOIN exercise as E on EF.exercise_id = E.id
+                WHERE EF.exercise_id = ? AND E.course_id = ? AND E.assignment_id = ?
+              ''' #this needs to be stored in the table too
       result = self.fetchall(sql, (exercise_id, course_id, assignment_id))
 
       # If exercise_steps are found, return the JSON string directly
@@ -607,7 +611,7 @@ class Content:
                 VALUES (?, ?, ?, ?)''',
       (exercise_id, course_id, assignment_id, exercise_steps_json_str)
 
-      result = self.execute(sql, (exercise_id, course_id, assignment_id, )) # use execute
+      result = self.execute(sql, (exercise_id, course_id, assignment_id, ))
 
       if result and result[0]:
           return result[0]

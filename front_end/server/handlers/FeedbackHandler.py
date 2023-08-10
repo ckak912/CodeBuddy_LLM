@@ -11,12 +11,12 @@ import json
 class FeedbackHandler(BaseUserHandler):
     async def get(self, course_id, assignment_id, exercise_id):
         try:
-            # Check if exercise_steps are available in the database (function from content.py)
-            exercise_steps = await self.content.retrieve_llm_step(exercise_id, course_id, assignment_id) #should be self.content
+            # Check if exercise_feedback are available in the database (function from content.py)
+            exercise_feedback = await self.content.retrieve_llm_feedback(exercise_id, course_id, assignment_id) 
             
-            print("Exercise Steps:", exercise_steps)
+            print("Exercise Feedback:", exercise_feedback)
             # if not available, make the API call to OpenAI
-            if not exercise_steps:
+            if not exercise_feedback:
                 
                 # get the api key from secrets.yaml
                 secrets_dict = load_yaml_dict(read_file("secrets/front_end.yaml"))
@@ -92,25 +92,25 @@ class FeedbackHandler(BaseUserHandler):
                     steps[step_number] = step_content.strip()
 
                 # Serialize the obtained steps into JSON format
-                exercise_steps_json = json.dumps(steps)
+                exercise_feedback_json = json.dumps(steps)
 
                 # Store the obtained steps in the database using store_llm_step in content.py
-                await self.content.store_llm_step(exercise_steps_json, exercise_id, course_id, assignment_id)
+                await self.content.store_llm_feedback(exercise_feedback_json, exercise_id, course_id, assignment_id)
 
-                print("Exercise Steps JSON: ", exercise_steps_json)
-                print("Steps after OpenAI call: ", exercise_steps)
+                print("Exercise Feedback JSON: ", exercise_feedback_json)
+                print("Feedback after OpenAI call: ", exercise_feedback_json)
 
             else:
                 print("Exercise steps found in the database.")
 
 
                 #  If exercise_steps are available in the database, parse the JSON data
-                exercise_steps = json.loads(exercise_steps_json)
+                exercise_feedback_json = json.loads(exercise_feedback_json)
 
-                print("Processed Exercise Steps: ", exercise_steps)
+                print("Processed Exercise Steps: ", exercise_feedback)
 
-            self.write(exercise_steps)
+            self.write(exercise_feedback)
 
         except Exception as inst:
             self.set_status(500)
-            self.finish({"error": "Failed to fetch exercise steps."})
+            self.finish({"error": "Failed to fetch exercise feedback."})
