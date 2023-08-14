@@ -586,35 +586,35 @@ class Content:
         return registered_courses
     
     def retrieve_llm_feedback(self, exercise_id, course_id, assignment_id):
-    # Retrieve the exercise_steps for the specified exercise_id, course_id, and assignment_id
-      sql = '''SELECT EF.exercise_feedback, E.assignment_id, E.course_id 
-                FROM LLM_stuff as EF
-                JOIN exercise as E on EF.exercise_id = E.id
-                WHERE EF.exercise_id = ? AND E.course_id = ? AND E.assignment_id = ?
+
+    # use JOIN to retrieve information from both tables and filter the result based on the IDs
+      sql = '''SELECT LF.exercise_feedback, LF.assignment_id, LF.course_id 
+                FROM LLM_stuff as LF
+                JOIN exercises as E on LF.exercise_id = E.exercise_id
+                WHERE LF.exercise_id = ? AND E.course_id = ? AND E.assignment_id = ?
               ''' #this needs to be stored in the table too
+      print("SQL Query:", sql)
       result = self.fetchall(sql, (exercise_id, course_id, assignment_id))
 
-      # If exercise_steps are found, return the JSON string directly
+      # If the model-generated feedback is found, return the JSON string directly
       if result and result[0]:
           return result[0]
 
       return None
 
-    # FEEDBACK STUFF
     # This function contains the SQL logic for storing steps after you have retrieved them from OpenAI
     def store_llm_feedback(self, exercise_id, course_id, assignment_id, exercise_feedback_json):
-
+      
       # Serialize the exercise steps into JSON format
-      exercise_steps_json_str = [json.dumps(exercise_feedback_json)]
+      exercise_feedback_json_str = [json.dumps(exercise_feedback_json)]
       
       sql = '''INSERT OR REPLACE INTO LLM_STUFF (exercise_id, course_id, assignment_id, exercise_feedback)
-                VALUES (?, ?, ?, ?)''',
-      (exercise_id, course_id, assignment_id, exercise_steps_json_str)
+                VALUES (?, ?, ?, ?)
+              '''
 
-      result = self.execute(sql, (exercise_id, course_id, assignment_id, ))
-
-      if result and result[0]:
-          return result[0]
+      result = self.execute(sql, (exercise_id, course_id, assignment_id, exercise_feedback_json_str))
+      if result:
+          return result
       
       return None
 

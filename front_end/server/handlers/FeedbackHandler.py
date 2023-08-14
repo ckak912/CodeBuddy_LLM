@@ -1,71 +1,109 @@
 from BaseUserHandler import *
-from content import Content
 import json
-
-#TODO: use the openAI API to get the steps. Store these steps in the database
-    # parse the secrets.yaml to get the api key. DONE
-    # If the steps are already available, retrieve them from the database using retrieve_llm_steps() DONE
-    # This get function in the handler should have multiple arguments DONE
-    # MAKE SURE THE PATH IN webserver.py MATCHES THE PATH HERE
+import requests
 
 class FeedbackHandler(BaseUserHandler):
-    async def get(self, course_id, assignment_id, exercise_id):
+    async def get(self, exercise_id, course_id, assignment_id):
         try:
-            # Check if exercise_feedback are available in the database (function from content.py)
-            exercise_feedback = await self.content.retrieve_llm_feedback(exercise_id, course_id, assignment_id) 
+            # Print the IDs before calling the content methods
+            print("Exercise ID:", exercise_id)
+            print("Course ID:", course_id)
+            print("Assignment ID:", assignment_id)
+
+            # # get exercise, course and assignment IDs
+            # exercise_basics = await self.content.get_exercise_basics(course_id, assignment_id, exercise_id)
+            # exercise_id = exercise_basics["exercise_id"]
+            # course_id = exercise_basics["course_id"]
+            # assignment_id = exercise_basics["assignment_id"]
+
+            exercise_feedback = await self.content.retrieve_llm_feedback(exercise_id, course_id, assignment_id)
             
-            print("Exercise Feedback:", exercise_feedback)
-            # if not available, make the API call to OpenAI
             if not exercise_feedback:
-                
-                # get the api key from secrets.yaml
+                print("xoxo")
+                # exercise_feedback = await self.content.retrieve_llm_feedback(exercise_id, course_id, assignment_id)
                 secrets_dict = load_yaml_dict(read_file("secrets/front_end.yaml"))
                 OPEN_AI_API_KEY = secrets_dict["openAI_api_key"]
 
                 API_URL = 'https://api.openai.com/v1/chat/completions'
-                model_role = 'Your role is that of a lecturer for an introductory programming course for 1st year university students. You never give out complete answers, you only provide hints.'
-                model_task_description = '''
-                Here's a task description that incorporates the concepts of arrays, data structures, conditional statements, and loops using functions and user input:
+                full_solution = '''
+                # Step 1: Define the calculate_average_grade function
+                def calculate_average_grade(grades):
+                # Step 2: Calculate the sum of grades using a loop
+                total = 0
+                for grade in grades:
+                    total += grade
 
-                Task: Student Grade Calculator
+                # Step 2 (continued): Calculate the average by dividing the sum by the number of grades
+                average = total / len(grades)
 
-                Description:
-                You are tasked with creating a program that calculates the average grade of a student based on their individual subject grades. The program should take inputs from the user, calculate the average grade, and provide feedback based on the average grade obtained.
+                # Return the average grade
+                return average
 
-                Requirements:
+                # Step 3: Define the provide_feedback function
+                def provide_feedback(average_grade):
 
-                Implement a function called calculate_average_grade that takes an array of subject grades as input.
-                The grades are represented as integers ranging from 0 to 100.
-                The function should calculate and return the average grade.
-                Implement a function called provide_feedback that takes the average grade as input.
-                Based on the average grade, the function should provide feedback according to the following criteria:
-                If the average grade is below 40, print "You need to improve your performance."
-                If the average grade is between 40 and 70 (both inclusive), print "Your performance is satisfactory."
-                If the average grade is above 70, print "You have excelled in your studies."
-                Implement a main program that prompts the user to enter the number of subjects they have grades for.
-                Based on the number of subjects, the program should prompt the user to enter the grades for each subject.
-                The program should call the calculate_average_grade function with the grades as input and store the result.
-                Finally, the program should call the provide_feedback function with the average grade as input and display the feedback to the user.
+                # Step 4: Use conditional statements to provide feedback based on the average grade
+                if average_grade < 40:
+                    print("You need to improve your performance.")
+                elif average_grade >= 40 and average_grade <= 70:
+                    print("Your performance is satisfactory.")
+                else:
+                    print("You have excelled in your studies.")
 
-                Your task is to implement the required functions and main program to achieve the above functionality. Ensure that the program handles invalid inputs gracefully and provides appropriate error messages.
+                # Step 5: Implement the main program
+                def main():
+
+                # Step 5: Prompt the user to enter the number of subjects
+                num_subjects = int(input("Enter the number of subjects: "))
+
+                # Step 6: Create an empty array to hold the grades
+                grades = []
+
+                # Step 7: Prompt the user to enter the grades for each subject and add them to the array
+                for i in range(num_subjects):
+                    while True:
+                        try:
+                            grade = int(input("Enter the grade for subject {}: ".format(i+1)))
+                            break
+                        except ValueError:
+                            print("Invalid input. Please enter a valid grade.")
+
+                    grades.append(grade)
+
+                # Step 8: Call the calculate_average_grade function with the grades as input
+                average_grade = calculate_average_grade(grades)
+
+                # Step 9: Call the provide_feedback function with the average grade as input
+                provide_feedback(average_grade)
+
+                # Step 10: Test the program
+                main()
                 '''
-
                 model_prompt = '''
-                As a lecturer, your task is to devise a step by step process for your students that encapsulates the above description. 
-                The steps should be in chronological order with an efficient way to complete the task. Ensure that the sub-steps are in concise paragraphs rather than bullet points. Each step is numbered (e.g. 1. , 2. , 3.)
+                You have been given the role of a educator providing feedback to students. You have been given the model solution that has a complete implementation of this exercise. This solution contains comments (e.g. "Step 1: Define the average_grade_calculator function") that preceed the code required to satisfy that step. 
+                Use this model solution as a guideline to help you provide feedback on the student code.
+
+                Structure your response as follows:
+
+                JSON Format:
+
+                "Step n Feedback":"feedback", for each step n
+
+                - If the student code has equivalent functionality to the corresponding code within the model solution , for feedback simply write "You have completed step n".
+                        
+                - If the student code doesn't have equivalent functionality to the corresponding code within the model solution, explain what is missing using purely natural language.
+
+                - Ensure that you provide feedback for the student code against each step of the model solution, even if there isn't relevant code to compare.
                 '''
 
-                # Append the retrieved exercise steps to the prompt
-                model_prompt = f'''
-                {model_role}
-
-                {model_task_description}
-
-                {exercise_steps}
-
-                {model_prompt}
+                user_code = '''
+                def calculate_average_grade(grades):
+                    sum = 0
+                    for grade in grades:
+                        sum += grade
+                    return sum/len(grades) 
                 '''
-
+                
                 headers = {
                     'Content-Type': 'application/json',
                     'Authorization': f'Bearer {OPEN_AI_API_KEY}'
@@ -73,18 +111,21 @@ class FeedbackHandler(BaseUserHandler):
 
                 data = {
                     'model': 'gpt-3.5-turbo',
-                    'messages': [{'role': 'user', 'content': f'{model_role}\n\n{model_task_description}\n\n{model_prompt}'}],
-                    'temperature': 0.7
+                    'messages': [
+                        {'role': 'user', 'content': user_code},
+                        {'role': 'assistant', 'content': full_solution},
+                        {'role': 'user', 'content': model_prompt}
+                    ],
+                    'temperature': 0.7,
+                    'max_tokens': 150  # Adjust the max tokens as needed
                 }
 
-                print(response)
-
-                session = requests.Session()
-                response = session.post(API_URL, headers=headers, json=data)
+                response = requests.post(API_URL, headers=headers, json=data)
                 result = response.json()
 
+                # print(result)
                 # Extract step numbers and content using regex
-                regex = r'(?:^|\n)(\d+)\.\s+(.*)'
+                regex = r'"Step (\d+) Feedback": "([^"]+)"'
                 steps = {}
                 for match in re.finditer(regex, result['choices'][0]['message']['content']):
                     step_number = match.group(1)
@@ -93,24 +134,12 @@ class FeedbackHandler(BaseUserHandler):
 
                 # Serialize the obtained steps into JSON format
                 exercise_feedback_json = json.dumps(steps)
-
-                # Store the obtained steps in the database using store_llm_step in content.py
-                await self.content.store_llm_feedback(exercise_feedback_json, exercise_id, course_id, assignment_id)
-
-                print("Exercise Feedback JSON: ", exercise_feedback_json)
-                print("Feedback after OpenAI call: ", exercise_feedback_json)
-
+                # You can store the assistant's reply in the database or perform any other desired action here
+                exercise_feedback_json = await self.content.store_llm_feedback(exercise_feedback_json, exercise_id, course_id, assignment_id)
             else:
-                print("Exercise steps found in the database.")
-
-
-                #  If exercise_steps are available in the database, parse the JSON data
-                exercise_feedback_json = json.loads(exercise_feedback_json)
-
-                print("Processed Exercise Steps: ", exercise_feedback)
-
-            self.write(exercise_feedback)
+                print("exercise feedback is in the database")
 
         except Exception as inst:
+            print("Exception:", inst)
             self.set_status(500)
             self.finish({"error": "Failed to fetch exercise feedback."})

@@ -329,31 +329,32 @@
                         $.ajax({
                             type: 'GET',
                             //CHANGE EXERCISE STEPS TO FEEDBACK
+                            
                             url: `/exercise_feedback/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}/{{ exercise_basics['id'] }}`, 
                             })
-                            .done(function(response) {
+                            // .done(function(response) {
 
-                                var steps = JSON.parse(response);
+                            //     var steps = JSON.parse(response);
 
-                                if (message.startsWith("Error:")) {
-                                    $("#leave_error_message").removeClass("invisible");
-                                    $("#leave_error_message")[0].innerHTML = `<div class="message-body">${message}</div>`;
+                            //     if (message.startsWith("Error:")) {
+                            //         $("#leave_error_message").removeClass("invisible");
+                            //         $("#leave_error_message")[0].innerHTML = `<div class="message-body">${message}</div>`;
 
-                                    // Generate dropdown items
-                                    var stepDropdown = document.getElementById("step_dropdown");
+                            //         // Generate dropdown items
+                            //         var stepDropdown = document.getElementById("step_dropdown");
     
-                                    Object.keys(steps).forEach(function (stepNumber) {
-                                    var option = document.createElement("option");
-                                    option.value = "Step " + stepNumber;
-                                    option.textContent = "Step " + stepNumber;
-                                    stepDropdown.appendChild(option);
-                                    });
-                                }
-                            })
-                            .fail(function(error) {
-                                    $("#leave_error_message").removeClass("invisible");
-                                $("#leave_error_message")[0].innerHTML = `<div class="message-body">${error}</div>`;
-                            });
+                            //         Object.keys(steps).forEach(function (stepNumber) {
+                            //         var option = document.createElement("option");
+                            //         option.value = "Step " + stepNumber;
+                            //         option.textContent = "Step " + stepNumber;
+                            //         stepDropdown.appendChild(option);
+                            //         });
+                            //     }
+                            // })
+                            // .fail(function(error) {
+                            //         $("#leave_error_message").removeClass("invisible");
+                            //     $("#leave_error_message")[0].innerHTML = `<div class="message-body">${error}</div>`;
+                            // });
                         }
 
                     Object.entries(steps).forEach(function ([stepNumber, stepContent]) {
