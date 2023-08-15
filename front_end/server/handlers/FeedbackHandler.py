@@ -5,10 +5,10 @@ import requests
 class FeedbackHandler(BaseUserHandler):
     async def get(self, exercise_id, course_id, assignment_id):
         try:
-            # Print the IDs before calling the content methods
-            print("Exercise ID:", exercise_id)
-            print("Course ID:", course_id)
-            print("Assignment ID:", assignment_id)
+            # # Print the IDs before calling the content methods
+            # print("Exercise ID:", exercise_id)
+            # print("Course ID:", course_id)
+            # print("Assignment ID:", assignment_id)
 
             # # get exercise, course and assignment IDs
             # exercise_basics = await self.content.get_exercise_basics(course_id, assignment_id, exercise_id)
@@ -16,11 +16,10 @@ class FeedbackHandler(BaseUserHandler):
             # course_id = exercise_basics["course_id"]
             # assignment_id = exercise_basics["assignment_id"]
 
-            exercise_feedback = await self.content.retrieve_llm_feedback(exercise_id, course_id, assignment_id)
+            exercise_feedback = self.content.retrieve_llm_feedback(exercise_id, course_id, assignment_id)
             
             if not exercise_feedback:
                 print("xoxo")
-                # exercise_feedback = await self.content.retrieve_llm_feedback(exercise_id, course_id, assignment_id)
                 secrets_dict = load_yaml_dict(read_file("secrets/front_end.yaml"))
                 OPEN_AI_API_KEY = secrets_dict["openAI_api_key"]
 
@@ -132,10 +131,9 @@ class FeedbackHandler(BaseUserHandler):
                     step_content = match.group(2)
                     steps[step_number] = step_content.strip()
 
-                # Serialize the obtained steps into JSON format
-                exercise_feedback_json = json.dumps(steps)
+                exercise_feedback_json_str = json.dumps(steps)
                 # You can store the assistant's reply in the database or perform any other desired action here
-                exercise_feedback_json = await self.content.store_llm_feedback(exercise_feedback_json, exercise_id, course_id, assignment_id)
+                self.content.store_llm_feedback(exercise_feedback_json_str, exercise_id, course_id, assignment_id)
             else:
                 print("exercise feedback is in the database")
 

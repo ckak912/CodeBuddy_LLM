@@ -309,79 +309,80 @@
 
                 var count = 1;
 
-                function generateDropdownItems(course_id, assignment_id, exercise_id) {
-                    
-                    // Update the color of the dropdown menu and the button
-                    var buttonElement = document.getElementById('tool_button');
-                    
-                    if (buttonElement.classList.contains('is-primary')) {
-                        buttonElement.classList.remove('is-primary');
-                    }
-                    buttonElement.classList.add('is-dark');
+                    function generateDropdownItems(course_id, assignment_id, exercise_id) {
+                        // Update the color of the dropdown menu and the button
+                        var buttonElement = document.getElementById('tool_button');
 
-                    var dropdownContent = document.getElementById("dropdown-content");
+                        if (buttonElement.classList.contains('is-primary')) {
+                            buttonElement.classList.remove('is-primary');
+                        }
+                        buttonElement.classList.add('is-dark');
 
-                    dropdownContent.innerHTML = "";
+                        var dropdownContent = document.getElementById("dropdown-content");
+                        dropdownContent.innerHTML = "";
 
-                    var stepsButton = document.getElementById("steps");
+                        var stepsButton = document.getElementById("steps");
 
-                    stepsButton.onclick = function() {
-                        $.ajax({
-                            type: 'GET',
-                            //CHANGE EXERCISE STEPS TO FEEDBACK
-                            
-                            url: `/exercise_feedback/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}/{{ exercise_basics['id'] }}`, 
+                        var url = `/exercise_feedback/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}/{{ exercise_basics['id'] }}`;
+                        stepsButton.onclick = function() {
+                            $.ajax({
+                                type: 'GET',
+                                url: url,
                             })
-                            // .done(function(response) {
+                            .done(function(response) {
+                                console.log(response);
 
-                            //     var steps = JSON.parse(response);
+                                try {
+                                    var steps = JSON.parse(response);
 
-                            //     if (message.startsWith("Error:")) {
-                            //         $("#leave_error_message").removeClass("invisible");
-                            //         $("#leave_error_message")[0].innerHTML = `<div class="message-body">${message}</div>`;
+                                    if (message.startsWith("Error:")) {
+                                        $("#leave_error_message").removeClass("invisible");
+                                        $("#leave_error_message")[0].innerHTML = `<div class="message-body">${message}</div>`;
 
-                            //         // Generate dropdown items
-                            //         var stepDropdown = document.getElementById("step_dropdown");
-    
-                            //         Object.keys(steps).forEach(function (stepNumber) {
-                            //         var option = document.createElement("option");
-                            //         option.value = "Step " + stepNumber;
-                            //         option.textContent = "Step " + stepNumber;
-                            //         stepDropdown.appendChild(option);
-                            //         });
-                            //     }
-                            // })
-                            // .fail(function(error) {
-                            //         $("#leave_error_message").removeClass("invisible");
-                            //     $("#leave_error_message")[0].innerHTML = `<div class="message-body">${error}</div>`;
-                            // });
+                                        // Generate dropdown items
+                                        var stepDropdown = document.getElementById("step_dropdown");
+
+                                        Object.keys(steps).forEach(function(stepNumber) {
+                                            var option = document.createElement("option");
+                                            option.value = "Step " + stepNumber;
+                                            option.textContent = "Step " + stepNumber;
+                                            stepDropdown.appendChild(option);
+                                        });
+                                    }
+                                } catch (error) {
+                                    console.error("JSON Parsing error:", error);
+                                }
+                            })
+                            .fail(function(error) {
+                                $("#leave_error_message").removeClass("invisible");
+                                $("#leave_error_message")[0].innerHTML = `<div class="message-body">${error}</div>`;
+                            });
                         }
 
-                    Object.entries(steps).forEach(function ([stepNumber, stepContent]) {
+                        Object.entries(steps).forEach(function([stepNumber, stepContent]) {
+                            stepComplete.push(false);
+                            var div = document.createElement("div");
+                            div.className = "dropdown-item";
+                            div.style.flex = "1";
 
-                    stepComplete.push(false);  
-                    var div = document.createElement("div");
-                    div.className = "dropdown-item";
-                    div.style.flex = "1";
+                            var p = document.createElement("p");
+                            p.style.textAlign = "justify";
+                            if (stepComplete[stepNumber - 1] === true) {
+                                p.style.textDecoration = "line-through";
+                            }
+                            p.textContent = stepNumber + ". " + stepContent;
 
-                    var p = document.createElement("p");
-                    p.style.textAlign = "justify";
-                    if (stepComplete[stepNumber - 1] === true) {
-                        p.style.textDecoration = "line-through";
+                            div.appendChild(p);
+                            dropdownContent.appendChild(div);
 
+                            var hr = document.createElement("hr");
+                            hr.className = "dropdown-divider";
+                            hr.style.flexBasis = "100%";
+                            hr.style.width = "100%";
+
+                            dropdownContent.appendChild(hr);
+                        });
                     }
-                    p.textContent = stepNumber + ". " + stepContent;
-
-                    div.appendChild(p);
-                    dropdownContent.appendChild(div);
-
-                    var hr = document.createElement("hr");
-                    hr.className = "dropdown-divider";
-                    hr.style.flexBasis = "100%";
-                    hr.style.width = "100%";
-
-                    dropdownContent.appendChild(hr);
-                    })};
 
                     function generate_help() {
 

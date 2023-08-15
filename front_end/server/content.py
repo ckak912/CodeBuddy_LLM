@@ -584,31 +584,28 @@ class Content:
                 registered_courses.append([course["course_id"], course_basics])
 
         return registered_courses
-    
+    # THIS IS WORKING NOW
     def retrieve_llm_feedback(self, exercise_id, course_id, assignment_id):
 
-    # use JOIN to retrieve information from both tables and filter the result based on the IDs
-      sql = '''SELECT LF.exercise_feedback, LF.assignment_id, LF.course_id 
-                FROM LLM_stuff as LF
-                JOIN exercises as E on LF.exercise_id = E.exercise_id
-                WHERE LF.exercise_id = ? AND E.course_id = ? AND E.assignment_id = ?
-              ''' #this needs to be stored in the table too
-      print("SQL Query:", sql)
+      # SQL query to retrieve feedback information from LLM_stuff table
+      sql = '''SELECT LF.exercise_feedback, LF.LLM_assignment_id, LF.LLM_course_id, LF.LLM_exercise_id 
+                  FROM LLM_stuff as LF
+                  JOIN exercises as E on LF.LLM_exercise_id = E.exercise_id
+                  WHERE LF.LLM_exercise_id = ? AND E.course_id = ? AND E.assignment_id = ?
+                '''
+      # Fetch feedback data from the database
       result = self.fetchall(sql, (exercise_id, course_id, assignment_id))
-
-      # If the model-generated feedback is found, return the JSON string directly
+      
       if result and result[0]:
           return result[0]
-
-      return None
+      else:
+          return None
+      # return result[0]
 
     # This function contains the SQL logic for storing steps after you have retrieved them from OpenAI
-    def store_llm_feedback(self, exercise_id, course_id, assignment_id, exercise_feedback_json):
+    def store_llm_feedback(self, exercise_id, course_id, assignment_id, exercise_feedback_json_str):
       
-      # Serialize the exercise steps into JSON format
-      exercise_feedback_json_str = [json.dumps(exercise_feedback_json)]
-      
-      sql = '''INSERT OR REPLACE INTO LLM_STUFF (exercise_id, course_id, assignment_id, exercise_feedback)
+      sql = '''INSERT OR REPLACE INTO LLM_STUFF (LLM_exercise_id, LLM_course_id, LLM_assignment_id, exercise_feedback)
                 VALUES (?, ?, ?, ?)
               '''
 
