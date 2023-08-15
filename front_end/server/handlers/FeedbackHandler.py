@@ -122,7 +122,6 @@ class FeedbackHandler(BaseUserHandler):
                 response = requests.post(API_URL, headers=headers, json=data)
                 result = response.json()
 
-                # print(result)
                 # Extract step numbers and content using regex
                 regex = r'"Step (\d+) Feedback": "([^"]+)"'
                 steps = {}
@@ -131,7 +130,7 @@ class FeedbackHandler(BaseUserHandler):
                     step_content = match.group(2)
                     steps[step_number] = step_content.strip()
 
-                exercise_feedback_json_str = json.dumps(steps)
+                exercise_feedback_json_str = self.write(json.dumps(steps))
                 # You can store the assistant's reply in the database or perform any other desired action here
                 self.content.store_llm_feedback(exercise_feedback_json_str, exercise_id, course_id, assignment_id)
             else:

@@ -335,7 +335,7 @@
                                 try {
                                     var steps = JSON.parse(response);
 
-                                    if (message.startsWith("Error:")) {
+                                    if (response.startsWith("Error:")) {
                                         $("#leave_error_message").removeClass("invisible");
                                         $("#leave_error_message")[0].innerHTML = `<div class="message-body">${message}</div>`;
 
