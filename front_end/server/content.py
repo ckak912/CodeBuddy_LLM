@@ -584,6 +584,36 @@ class Content:
                 registered_courses.append([course["course_id"], course_basics])
 
         return registered_courses
+    # THIS IS WORKING NOW
+    def retrieve_llm_feedback(self, exercise_id, course_id, assignment_id):
+
+      # SQL query to retrieve feedback information from LLM_stuff table
+      sql = '''SELECT LF.exercise_feedback, LF.LLM_assignment_id, LF.LLM_course_id, LF.LLM_exercise_id 
+                  FROM LLM_stuff as LF
+                  JOIN exercises as E on LF.LLM_exercise_id = E.exercise_id
+                  WHERE LF.LLM_exercise_id = ? AND E.course_id = ? AND E.assignment_id = ?
+                '''
+      # Fetch feedback data from the database
+      result = self.fetchall(sql, (exercise_id, course_id, assignment_id))
+      
+      if result and result[0]:
+          return result[0]
+      else:
+          return None
+      # return result[0]
+
+    # This function contains the SQL logic for storing steps after you have retrieved them from OpenAI
+    def store_llm_feedback(self, exercise_id, course_id, assignment_id, exercise_feedback_json_str):
+      
+      sql = '''INSERT OR REPLACE INTO LLM_STUFF (LLM_exercise_id, LLM_course_id, LLM_assignment_id, exercise_feedback)
+                VALUES (?, ?, ?, ?)
+              '''
+
+      result = self.execute(sql, (exercise_id, course_id, assignment_id, exercise_feedback_json_str))
+      if result:
+          return result
+      
+      return None
 
     # TODO: This function could probably be removed. get_exercise_statuses could be used in its place.
     def get_exercises(self, course_basics, assignment_basics, show_hidden=True):

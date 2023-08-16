@@ -12,8 +12,6 @@ class ExerciseHandler(BaseUserHandler):
             course_basics = await self.get_course_basics(course_id)
             course_details = await self.get_course_details(course_id)
 
-            # steps = await self.generate_dropdown_items()
-
             assignments = await self.get_assignments(course_basics)
             assignment_basics = await self.get_assignment_basics(course_basics, assignment_id)
             assignment_details = await self.get_assignment_details(course_basics, assignment_id)
