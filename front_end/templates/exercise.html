@@ -163,7 +163,7 @@
             <p class="is-primary has-tooltip-multiline has-tooltip-right" data-tooltip="After you have entered your response, click on 'Submit'." />
 
             <div class="llm_bar">        
-                <a class="button is-medium is-primary" id="help" onclick="generate_help()">Help Me</a>
+                <a class="button is-medium is-primary" id="help" onclick="generateDropdownItems(1)">Help Me</a>
 
                 <div id="steps_dropdown" class="top-space dropdown is-outlined is-pulled-right margin-bottom my-5 mt-5" style="width: fit-content;  " onclick="toggleDropdown('steps_dropdown')">
                     <div class="dropdown-trigger">
@@ -181,7 +181,7 @@
                     </div>
                 </div>
 
-                <a class="button is-medium is-dark" id="steps">Steps</a>
+                <a class="button is-medium is-dark" id="steps" onclick="generateDropdownItems(0)">Steps</a>
             </div>
             
 
@@ -227,6 +227,7 @@
                     <section class="modal-card-body" id="step_feedback_body"></section>
                     <footer class="modal-card-foot">
                         <button class="button" onclick="closeModal()">Back</button>
+                        <button class="button" onclick="updateModal()">Update Feedback</button>
                     </footer>
                 </div>
             </div>
@@ -254,31 +255,41 @@
 
             .modal {
                 display: none;
-                position: fixed;
+                position: absolute;
                 z-index: 9999;
                 top: 0;
                 left: 0;
+                bottom: 0;
                 width: 100%;
-                height: 100%;
+                height: auto;
                 background-color: rgba(0, 0, 0, 0.01);
             }
 
             .modal-content {
-                position: fixed;
-                top: 10%;
+                position: relative;
+                top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
                 background-color: white;
                 padding: 20px;
                 border-radius: 10px;
                 max-width: 600px;
-                max-height: fit-content;
+                max-height: 80vh;
+            }
+
+            .modal-card-foot {
+                position: relative;
+                margin-bottom: 25%;
+                display: flex;
+                justify-content: flex-start;
             }
 
             .modal-close {
-                position: absolute;
-                top: 10px;
-                right: 10px;
+                position: relative;
+                top: 0px;
+                right: 0px;
+                left: 0px;
+                bottom: 0px;
                 background-color: transparent;
                 border: none;
                 cursor: pointer;
@@ -309,82 +320,93 @@
 
                 var count = 1;
 
-                    function generateDropdownItems(course_id, assignment_id, exercise_id) {
+
+
+
+                // Function to generate dropdown items dynamically
+                async function generateDropdownItems(tool_feature) {
+
+                        try {
+                        // Make an HTTP request to the exercise endpoint
+                        const response = await fetch('/static/step_process.json');
+
+                        // Check the response status
+                        if (!response.ok) {
+                        throw new Error('Failed to fetch exercise data');
+                        }
+
+                        // Parse the response data
+                        steps = await response.json();
+
+                    } catch (error) {
+                        console.error('Error:', error.message);
+                    }
+                                        
+                    // Generate modal body content
+                    var modalBody = document.getElementById("step_feedback_body");
+                    modalBody.innerHTML = ""; // Clear existing content
+
+                    Object.keys(steps).forEach(function (stepNumber) {
+                    var paragraph = document.createElement("strong");
+                    paragraph.textContent = "Step " + stepNumber + " Feedback:";
+                    modalBody.appendChild(paragraph);
+
+                    var content = document.createElement("p");
+                    content.textContent = steps[stepNumber];
+                    content.id = "step" + stepNumber + "_content"; // Assign a unique ID for each step's content
+                    modalBody.appendChild(content);
+
+
+                    const hrFeedback = document.createElement("hr");
+                    hrFeedback.className = "dropdown-divider";
+                    hrFeedback.style.flexBasis = "100%";
+                    hrFeedback.style.width = "100%";
+                    modalBody.appendChild(hrFeedback);
+
+                    });
+
+
+                    var dropdownContent = document.getElementById("dropdown-content");
+
+                    if (tool_feature === 0) {
+
                         // Update the color of the dropdown menu and the button
                         var buttonElement = document.getElementById('tool_button');
-
+                        
                         if (buttonElement.classList.contains('is-primary')) {
                             buttonElement.classList.remove('is-primary');
                         }
                         buttonElement.classList.add('is-dark');
 
-                        var dropdownContent = document.getElementById("dropdown-content");
+
                         dropdownContent.innerHTML = "";
 
-                        var stepsButton = document.getElementById("steps");
+                        Object.entries(steps).forEach(function ([stepNumber, stepContent]) {
 
-                        var url = `/exercise_feedback/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}/{{ exercise_basics['id'] }}`;
-                        stepsButton.onclick = function() {
-                            $.ajax({
-                                type: 'GET',
-                                url: url,
-                            })
-                            .done(function(response) {
-                                console.log(response);
+                        stepComplete.push(false);  
+                        var div = document.createElement("div");
+                        div.className = "dropdown-item";
+                        div.style.flex = "1";
 
-                                try {
-                                    var steps = JSON.parse(response);
+                        var p = document.createElement("p");
+                        p.style.textAlign = "justify";
+                        if (stepComplete[stepNumber - 1] === true) {
+                            p.style.textDecoration = "line-through";
 
-                                    if (response.startsWith("Error:")) {
-                                        $("#leave_error_message").removeClass("invisible");
-                                        $("#leave_error_message")[0].innerHTML = `<div class="message-body">${message}</div>`;
-
-                                        // Generate dropdown items
-                                        var stepDropdown = document.getElementById("step_dropdown");
-
-                                        Object.keys(steps).forEach(function(stepNumber) {
-                                            var option = document.createElement("option");
-                                            option.value = "Step " + stepNumber;
-                                            option.textContent = "Step " + stepNumber;
-                                            stepDropdown.appendChild(option);
-                                        });
-                                    }
-                                } catch (error) {
-                                    console.error("JSON Parsing error:", error);
-                                }
-                            })
-                            .fail(function(error) {
-                                $("#leave_error_message").removeClass("invisible");
-                                $("#leave_error_message")[0].innerHTML = `<div class="message-body">${error}</div>`;
-                            });
                         }
+                        p.textContent = stepNumber + ". " + stepContent;
 
-                        Object.entries(steps).forEach(function([stepNumber, stepContent]) {
-                            stepComplete.push(false);
-                            var div = document.createElement("div");
-                            div.className = "dropdown-item";
-                            div.style.flex = "1";
+                        div.appendChild(p);
+                        dropdownContent.appendChild(div);
 
-                            var p = document.createElement("p");
-                            p.style.textAlign = "justify";
-                            if (stepComplete[stepNumber - 1] === true) {
-                                p.style.textDecoration = "line-through";
-                            }
-                            p.textContent = stepNumber + ". " + stepContent;
-
-                            div.appendChild(p);
-                            dropdownContent.appendChild(div);
-
-                            var hr = document.createElement("hr");
-                            hr.className = "dropdown-divider";
-                            hr.style.flexBasis = "100%";
-                            hr.style.width = "100%";
-
-                            dropdownContent.appendChild(hr);
+                        const hrSteps = document.createElement("hr");
+                        hrSteps.className = "dropdown-divider";
+                        hrSteps.style.flexBasis = "100%";
+                        hrSteps.style.width = "100%";
+                        dropdownContent.appendChild(hrSteps);
                         });
-                    }
-
-                    function generate_help() {
+                        
+                    } else if (tool_feature === 1) {
 
                         // Update the color of the dropdown menu and the button
                         var buttonElement = document.getElementById('tool_button');
@@ -394,17 +416,36 @@
                         }
                         buttonElement.classList.add('is-primary');
 
-                        const dropdownContent = document.getElementById("dropdown-content");
-
                         // Clear existing options
-                        dropdownContent.innerHTML = ""; 
+                        dropdownContent.innerHTML = "";
+
+                        // Create 'What's Next' feature
+                        var whatsNextDiv  = document.createElement("div");
+                        whatsNextDiv.className = "dropdown-item";
+                        whatsNextDiv.style.flex = "1";
+
+                        var whatsNextP = document.createElement("p");
+                        whatsNextP.style.textAlign = "justify";
+                        whatsNextP.textContent = "HELLO MY BRO WHAT THE IS GOING ON GOOD THANKS YEAH THATS GOOD";
+                        whatsNextP.id = "id_whatsnext"
+
+                        whatsNextDiv.appendChild(whatsNextP);
+                        dropdownContent.appendChild(whatsNextDiv);
+
+                        const hrNext = document.createElement("hr");
+                        hrNext.className = "dropdown-divider";
+                        hrNext.style.flexBasis = "100%";
+                        hrNext.style.width = "100%";
+
+                        dropdownContent.appendChild(hrNext);
 
                         // Create the hint button
                         const hintButton = document.createElement("hint-button");
                         hintButton.className = "button is-primary is-small";
                         hintButton.style.width = "100%";
                         hintButton.style.textAlign = "center";
-                        hintButton.textContent = "Click here to append hint code to editor";
+                        hintButton.id = "hint_button_id";
+                        hintButton.textContent = "Generate Hint (ONCE PER STEP)";
 
                         const hintElement = document.createElement("div");
                         hintElement.className = "dropdown-item";
@@ -413,35 +454,126 @@
                         hintElement.appendChild(hintButton);
                         dropdownContent.appendChild(hintElement);
 
-                        // Add click event listener to the hint button
-                        hintButton.addEventListener("click", function () {
-                            var existingCode = editor.getValue().trim();
 
-                            // Dummy data to be appended to the code editor
-                            var dummyCode = `
-                                // hint
-                                function dummyFunction() {
-                                    console.log('this is dummy code.');
-                                }
-                            `;
 
-                            var updatedCode = existingCode + dummyCode;
+                        const hrHint = document.createElement("hr");
+                        hrHint.className = "dropdown-divider";
+                        hrHint.style.flexBasis = "100%";
+                        hrHint.style.width = "100%";
+                        dropdownContent.appendChild(hrHint);
+
+                        generate_help(steps)
+
+                    }
+
+                        
+                }
+                
+
+
+                    
+                function generate_help(stepProcessGen) {
+                    const OPENAI_API_KEY = '';
+                    const apiUrl = 'https://api.openai.com/v1/chat/completions';
+
+
+                    const model_prompt =`Given the current state of the user code, and the step process provided, use pseudo code to show how to complete the current step`
+
+                    var userCodes = editor.getValue().trim();
+
+                    const headers = {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${OPENAI_API_KEY}`
+                    };
+
+                    const data = {
+                    model: 'gpt-3.5-turbo',
+                    messages: [{ role: 'user', content: stepProcessGen + '\n\n' + userCodes + '\n\n' + model_prompt}],
+                    temperature: 0.7
+                    };
+
+                    fetch(apiUrl, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify(data)
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        // Assuming the API response is stored in 'response' variable
+                        const apiResponseNext = result.choices[0].message.content;
+
+                        var whatsNextContent = document.getElementById("id_whatsnext");
+                        whatsNextContent.textContent = apiResponseNext;
+
+                        
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        // Handle any errors here
+                    });
+
+                    // Add click event listener to the hint button
+                    var hintBtn = document.getElementById("hint_button_id");
+                    hintBtn.addEventListener("click", function () {
+                        var existingCode = editor.getValue().trim();
+
+                        const OPENAI_API_KEY = '';
+                        const apiUrl = 'https://api.openai.com/v1/chat/completions';
+
+
+                        const model_role = `You have the role of a teaching assistant that is there to help students complete programming tasks. You only generate the line of code for a given step.`
+
+                        const next_step = `Loop through the grades array:
+                        - For each grade in grades:
+                        - Add the grade to the sum variable
+
+                        Calculate the average grade:
+                        - Divide the sum by the length of the grades array
+
+                        Return the average grade`
+
+                        const model_prompt =`Given the current state of the user code, the step process provided, and the psuedo code for the current step, generate the next line of code that will help a student on the current step.
+                        `
+
+                        const headers = {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${OPENAI_API_KEY}`
+                        };
+
+                        const data = {
+                        model: 'gpt-3.5-turbo',
+                        messages: [{ role: 'user', content: steps + '\n\n' + existingCode + '\n\n' + next_step + '\n\n' + model_prompt}],
+                        temperature: 0.7
+                        };
+
+                        fetch(apiUrl, {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify(data)
+                        })
+                        .then(response => response.json())
+                        .then(result => {
+                            // Assuming the API response is stored in 'response' variable
+                            const apiResponseHint = result.choices[0].message.content;
+
+                            var updatedCode = existingCode + '\n' + apiResponseHint;
 
                             // Set the updated code in the editor
                             editor.setValue(updatedCode);
+
+
+                        })
+                        .catch(error => {
+                            console.error(error);
+                            // Handle any errors here
                         });
 
-                        const hr = document.createElement("hr");
-                        hr.className = "dropdown-divider";
-                        hr.style.flexBasis = "100%";
-                        hr.style.width = "100%";
-
-                        dropdownContent.appendChild(hr);
-                    }
+                    });
+                }
 
                 // Wait for the DOM to be fully loaded
                 document.addEventListener("DOMContentLoaded", function () {
-                    generateDropdownItems('${course_id}', '${assignment_id}', '${exercise_id}') // fix this         
+                    generateDropdownItems(0);
                 });
             </script>
 
@@ -459,6 +591,14 @@
                 var modal = document.getElementById('code_review_modal');
                 modal.style.display = 'none';
                 document.getElementById('modal_background').removeEventListener('click', closeModal);
+            }
+
+
+            // Function to update feedback
+            function updateModal() {
+                // To change the feedback for Step 11
+                var step11Content = document.getElementById("step11_content");
+                step11Content.textContent = "This is the updated feedback for Step 11.";
             }
 
              // Function to close the modal after a slight delay
@@ -518,12 +658,7 @@
             // }
 
             // Function to open the feedback modal
-            function openFeedbackModal(feedback) {
-                var feedbackModal = document.getElementById('code_review_modal');
-                feedbackBody = document.getElementById('step_feedback_body');
-
-                // Update the feedback in the mdoal body
-                feedbackBody.textContent = feedback;
+            function openFeedbackModal() {
 
                 // Show the feedback modal
                 modal.classList.add('is-active')
