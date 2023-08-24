@@ -596,9 +596,37 @@
 
             // Function to update feedback
             function updateModal() {
-                // To change the feedback for Step 11
-                var step11Content = document.getElementById("step11_content");
-                step11Content.textContent = "This is the updated feedback for Step 11.";
+                let feedback = {};
+                var reviewButton = document.getElementById('review_button');
+                var url = `/exercise_feedback/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}/{{ exercise_basics['id'] }}`;
+
+                reviewButton.onclick = function() {
+                    $.ajax({
+                        type: 'GET',
+                        url: url,
+                    })
+                    .done(function(response) {
+                        try {
+                            console.log(response);
+                            feedback = JSON.parse(response);
+                            
+
+                            Object.entries(feedback).forEach(function ([stepNumber, feedbackContent]) {
+                                var currentID = "step" + stepNumber + "_content";
+                                var currentFeedback = document.getElementById(currentID);
+                                currentFeedback.textContent = feedbackContent;
+                            });
+
+                        } catch (error) {
+                            console.error("JSON Parsing error:", error);
+                        }
+                    })
+                    .fail(function(error) {
+                        console.error("AJAX error:", error);
+                        // Handle the error message here if needed
+                    });
+                };
+
             }
 
              // Function to close the modal after a slight delay
@@ -667,9 +695,39 @@
 
             // Function to check step functionality and display feedback
             function checkStepFunctionality() {
+                let feedback = {};
+                var reviewButton = document.getElementById('review_button');
+                var url = `/exercise_feedback/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}/{{ exercise_basics['id'] }}`;
+
+                reviewButton.onclick = function() {
+                    $.ajax({
+                        type: 'GET',
+                        url: url,
+                    })
+                    .done(function(response) {
+                        try {
+                            console.log(response);
+                            feedback = JSON.parse(response);
+                            
+
+                            Object.entries(feedback).forEach(function ([stepNumber, feedbackContent]) {
+                                var currentID = "step" + stepNumber + "_content";
+                                var currentFeedback = document.getElementById(currentID);
+                                currentFeedback.textContent = feedbackContent;
+                            });
+
+                        } catch (error) {
+                            console.error("JSON Parsing error:", error);
+                        }
+                    })
+                    .fail(function(error) {
+                        console.error("AJAX error:", error);
+                        // Handle the error message here if needed
+                    });
+                };
                 
-                var selectedStep = "Step 1";
-                var feedback = 'You have completed Step 1. Great job! \n'/*  + 
+                /*var selectedStep = "Step 1";
+                var feedback = 'You have completed Step 1. Great job! \n'  + 
                                 'Step 2 is incomplete \n' + 
                                 'Step 3 is incomplete \n' +
                                 'Step 4 is incomplete \n' +
@@ -697,7 +755,7 @@
                 } */
 
                 // Open the feedback modal and display the feedback
-                openFeedbackModal(feedback);
+                // openFeedbackModal(feedback);
 
                 // Update the step dropdown HTML element
                 //var stepDropdown = document.getElementById("dropdown-content");
