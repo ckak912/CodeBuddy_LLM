@@ -584,7 +584,6 @@ class Content:
                 registered_courses.append([course["course_id"], course_basics])
 
         return registered_courses
-    # THIS IS WORKING NOW
     def retrieve_llm_feedback(self, exercise_id, course_id, assignment_id):
 
       # SQL query to retrieve feedback information from LLM_stuff table

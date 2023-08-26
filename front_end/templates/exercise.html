@@ -324,23 +324,38 @@
 
 
                 // Function to generate dropdown items dynamically
-                async function generateDropdownItems(tool_feature) {
+                 function generateDropdownItems(tool_feature) {
+                    id="help" 
+                    var helpButton = document.getElementById("help");
+                    var url = `/exercise_IDK/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}/{{ exercise_basics['id'] }}`;
 
+                    reviewButton.onclick = function() {
+                    $.ajax({
+                        type: 'GET',
+                        url: url,
+                    })
+                    .done(function(response) {
                         try {
-                        // Make an HTTP request to the exercise endpoint
-                        const response = await fetch('/static/step_process.json');
+                            console.log(response);
+                            feedback = JSON.parse(response);
+                            
 
-                        // Check the response status
-                        if (!response.ok) {
-                        throw new Error('Failed to fetch exercise data');
+                            Object.entries(feedback).forEach(function ([stepNumber, feedbackContent]) {
+                                var currentID = "step" + stepNumber + "_content";
+                                var currentFeedback = document.getElementById(currentID);
+                                currentFeedback.textContent = feedbackContent;
+                            });
+
+                        } catch (error) {
+                            console.error("JSON Parsing error:", error);
                         }
+                    })
+                    .fail(function(error) {
+                        console.error("AJAX error:", error);
+                        // Handle the error message here if needed
+                    });
+                };
 
-                        // Parse the response data
-                        steps = await response.json();
-
-                    } catch (error) {
-                        console.error('Error:', error.message);
-                    }
                                         
                     // Generate modal body content
                     var modalBody = document.getElementById("step_feedback_body");

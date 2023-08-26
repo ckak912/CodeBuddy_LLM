@@ -5,17 +5,6 @@ import requests
 class FeedbackHandler(BaseUserHandler):
     async def get(self, exercise_id, course_id, assignment_id):
         try:
-            # # Print the IDs before calling the content methods
-            # print("Exercise ID:", exercise_id)
-            # print("Course ID:", course_id)
-            # print("Assignment ID:", assignment_id)
-
-            # # get exercise, course and assignment IDs
-            # exercise_basics = await self.content.get_exercise_basics(course_id, assignment_id, exercise_id)
-            # exercise_id = exercise_basics["exercise_id"]
-            # course_id = exercise_basics["course_id"]
-            # assignment_id = exercise_basics["assignment_id"]
-
             exercise_feedback = self.content.retrieve_llm_feedback(exercise_id, course_id, assignment_id)
             
             if not exercise_feedback:
@@ -95,6 +84,8 @@ class FeedbackHandler(BaseUserHandler):
                 - Ensure that you provide feedback for the student code against each step of the model solution, even if there isn't relevant code to compare.
                 '''
 
+                # this value should be stored in the database and fetched
+                # using a content method. Will need a new migr
                 user_code = '''
                 def calculate_average_grade(grades):
                     sum = 0
