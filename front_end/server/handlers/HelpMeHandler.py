@@ -64,20 +64,6 @@ class HelpMeHandler(BaseUserHandler):
             result = response.json()
 
             print(result)
-            # # print(result)
-            # # Extract step numbers and content using regex
-            # regex = r'"Step (\d+) Feedback": "([^"]+)"'
-            # steps = {}
-            # for match in re.finditer(regex, result['choices'][0]['message']['content']):
-            #     step_number = match.group(1)
-            #     step_content = match.group(2)
-            #     steps[step_number] = step_content.strip()
-
-            # # Serialize the obtained steps into JSON format
-            # exercise_feedback_json = json.dumps(steps)
-            # # You can store the assistant's reply in the database or perform any other desired action here
-
-            # print(exercise_feedback_json)
 
         except Exception as inst:
             self.set_status(500)
