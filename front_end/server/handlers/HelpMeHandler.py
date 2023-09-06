@@ -5,12 +5,9 @@ import requests
 class HelpMeHandler(BaseUserHandler):
     async def get(self, exercise_id, course_id, assignment_id):
         try:
-            print("xoxo")
-            # TODO: Implement content method to retrieve hint code
             exercise_hint_code = self.content.retrieve_hint_code(exercise_id, course_id, assignment_id)
 
             if not exercise_hint_code:
-                print("eshay")
 
                 secrets_dict = load_yaml_dict(read_file("secrets/front_end.yaml"))
                 OPEN_AI_API_KEY = secrets_dict["openAI_api_key"]
@@ -77,8 +74,9 @@ class HelpMeHandler(BaseUserHandler):
                     hint_code = hint_code_match.group(1)
                     hint_code = hint_code.replace(r'\n', '\n')
                     print(hint_code)
-
-                self.content.store_hint_code(result, exercise_id, course_id, assignment_id)
+                
+                hint_code_json = self.write(json.dumps(hint_code))
+                self.content.store_hint_code(hint_code_json, exercise_id, course_id, assignment_id)
             else:
                 print("hint code is in the database")
                 

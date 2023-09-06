@@ -536,10 +536,15 @@
                             url: url,
                         })
                         .done(function(response) {
-                            console.log(response);
+                            try {
+                                var jsonHintCode = JSON.parse(response);
+                                console.log(jsonHintCode)
+                            } catch (e) {
+                                console.error("Error parsing JSON response:", e)
+                            }
                         })
                         .fail(function(error) {
-                            // console.error("AJAX error:", error);
+                            console.error("AJAX error:", error);
                         })
                     };
                 }
