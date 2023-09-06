@@ -7,7 +7,7 @@ class HelpMeHandler(BaseUserHandler):
         try:
             print("xoxo")
             # TODO: Implement content method to retrieve hint code
-            exercise_hint_code = await self.content.retrieve_hint_code(exercise_id, course_id, assignment_id)
+            exercise_hint_code = self.content.retrieve_hint_code(exercise_id, course_id, assignment_id)
 
             if not exercise_hint_code:
                 print("eshay")
@@ -67,7 +67,16 @@ class HelpMeHandler(BaseUserHandler):
 
                 response = requests.post(API_URL, headers=headers, json=data)
                 result = response.json()
-                print(result)
+
+                # Extract the hint code using regex
+                hint_code_regex = r"'content': '([^']+)'"
+                hint_code_match = re.search(hint_code_regex, str(result))
+
+                # Check if a match was found and get the hint code
+                if hint_code_match:
+                    hint_code = hint_code_match.group(1)
+                    hint_code = hint_code.replace(r'\n', '\n')
+                    print(hint_code)
 
                 self.content.store_hint_code(result, exercise_id, course_id, assignment_id)
             else:

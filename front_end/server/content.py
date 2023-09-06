@@ -585,25 +585,6 @@ class Content:
 
         return registered_courses
     
-    def retrieve_hint_code(self, exercise_id, course_id, assignment_id):
-      # SQL query to retrieve hint code from LLM_stuff table
-      sql = '''SELECT LF.hint_code, LF.LLM_assignment_id, LF.LLM_course_id, LF.LLM_exercise_id 
-                  FROM LLM_stuff as LF
-                  JOIN exercises as E on LF.LLM_exercise_id = E.exercise_id
-                  WHERE LF.LLM_exercise_id = ? AND E.course_id = ? AND E.assignment_id = ?
-                '''
-      # Log the SQL query and parameters for debugging
-      print("SQL Query:", sql)
-      print("Parameters:", (exercise_id, course_id, assignment_id))
-
-      # Fetch feedback data from the database
-      result = self.fetchall(sql, (exercise_id, course_id, assignment_id))
-      
-      print("Database result:", result)
-      if result and result[0]:
-          return result[0]
-      else:
-          return None
 
     def retrieve_llm_feedback(self, exercise_id, course_id, assignment_id):
 
@@ -631,7 +612,25 @@ class Content:
 
       if result:
           return result
+      
       return None
+    
+    def retrieve_hint_code(self, exercise_id, course_id, assignment_id):
+      # SQL query to retrieve hint code from LLM_stuff table
+      sql = '''SELECT LF.hint_code, LF.LLM_assignment_id, LF.LLM_course_id, LF.LLM_exercise_id 
+                  FROM LLM_stuff as LF
+                  JOIN exercises as E on LF.LLM_exercise_id = E.exercise_id
+                  WHERE LF.LLM_exercise_id = ? AND E.course_id = ? AND E.assignment_id = ?
+                '''
+
+      # Fetch feedback data from the database
+      result = self.fetchall(sql, (exercise_id, course_id, assignment_id))
+      
+      if result and result[0]:
+          return result[0]
+      else:
+          return None
+      
     # This function contains the SQL logic for storing steps after you have retrieved them from OpenAI
     def store_llm_feedback(self, exercise_id, course_id, assignment_id, exercise_feedback_json_str):
       

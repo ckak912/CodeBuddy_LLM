@@ -537,10 +537,9 @@
                         })
                         .done(function(response) {
                             console.log(response);
-                            hint_code = JSON.parse(response);
                         })
                         .fail(function(error) {
-                            console.error("AJAX error:", error);
+                            // console.error("AJAX error:", error);
                         })
                     };
                 }
