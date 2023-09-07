@@ -1,0 +1,3 @@
+ALTER TABLE LLM_stuff
+ADD COLUMN hint_code JSON NOT NULL DEFAULT '{}';
+

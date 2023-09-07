@@ -324,23 +324,38 @@
 
 
                 // Function to generate dropdown items dynamically
-                async function generateDropdownItems(tool_feature) {
+                 function generateDropdownItems(tool_feature) {
+                    id="help" 
+                    var helpButton = document.getElementById("help");
+                    var url = `/exercise_IDK/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}/{{ exercise_basics['id'] }}`;
 
+                    reviewButton.onclick = function() {
+                    $.ajax({
+                        type: 'GET',
+                        url: url,
+                    })
+                    .done(function(response) {
                         try {
-                        // Make an HTTP request to the exercise endpoint
-                        const response = await fetch('/static/step_process.json');
+                            console.log(response);
+                            feedback = JSON.parse(response);
+                            
 
-                        // Check the response status
-                        if (!response.ok) {
-                        throw new Error('Failed to fetch exercise data');
+                            Object.entries(feedback).forEach(function ([stepNumber, feedbackContent]) {
+                                var currentID = "step" + stepNumber + "_content";
+                                var currentFeedback = document.getElementById(currentID);
+                                currentFeedback.textContent = feedbackContent;
+                            });
+
+                        } catch (error) {
+                            console.error("JSON Parsing error:", error);
                         }
+                    })
+                    .fail(function(error) {
+                        console.error("AJAX error:", error);
+                        // Handle the error message here if needed
+                    });
+                };
 
-                        // Parse the response data
-                        steps = await response.json();
-
-                    } catch (error) {
-                        console.error('Error:', error.message);
-                    }
                                         
                     // Generate modal body content
                     var modalBody = document.getElementById("step_feedback_body");
@@ -512,63 +527,26 @@
                         // Handle any errors here
                     });
 
-                    // Add click event listener to the hint button
+                    // hit the hint code endpoint on click event 
                     var hintBtn = document.getElementById("hint_button_id");
-                    hintBtn.addEventListener("click", function () {
-                        var existingCode = editor.getValue().trim();
-
-                        const OPENAI_API_KEY = '';
-                        const apiUrl = 'https://api.openai.com/v1/chat/completions';
-
-
-                        const model_role = `You have the role of a teaching assistant that is there to help students complete programming tasks. You only generate the line of code for a given step.`
-
-                        const next_step = `Loop through the grades array:
-                        - For each grade in grades:
-                        - Add the grade to the sum variable
-
-                        Calculate the average grade:
-                        - Divide the sum by the length of the grades array
-
-                        Return the average grade`
-
-                        const model_prompt =`Given the current state of the user code, the step process provided, and the psuedo code for the current step, generate the next line of code that will help a student on the current step.
-                        `
-
-                        const headers = {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${OPENAI_API_KEY}`
-                        };
-
-                        const data = {
-                        model: 'gpt-3.5-turbo',
-                        messages: [{ role: 'user', content: steps + '\n\n' + existingCode + '\n\n' + next_step + '\n\n' + model_prompt}],
-                        temperature: 0.7
-                        };
-
-                        fetch(apiUrl, {
-                        method: 'POST',
-                        headers,
-                        body: JSON.stringify(data)
+                    var url = `/exercise_hint_code/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}/{{ exercise_basics['id'] }}`;
+                    hintBtn.onclick = function () {
+                        $.ajax({
+                            type: 'GET',
+                            url: url,
                         })
-                        .then(response => response.json())
-                        .then(result => {
-                            // Assuming the API response is stored in 'response' variable
-                            const apiResponseHint = result.choices[0].message.content;
-
-                            var updatedCode = existingCode + '\n' + apiResponseHint;
-
-                            // Set the updated code in the editor
-                            editor.setValue(updatedCode);
-
-
+                        .done(function(response) {
+                            try {
+                                var jsonHintCode = JSON.parse(response);
+                                console.log(jsonHintCode)
+                            } catch (e) {
+                                console.error("Error parsing JSON response:", e)
+                            }
                         })
-                        .catch(error => {
-                            console.error(error);
-                            // Handle any errors here
-                        });
-
-                    });
+                        .fail(function(error) {
+                            console.error("AJAX error:", error);
+                        })
+                    };
                 }
 
                 // Wait for the DOM to be fully loaded
@@ -608,7 +586,7 @@
                     .done(function(response) {
                         try {
                             console.log(response);
-                            feedback = JSON.parse(response);
+                            // feedback = JSON.parse(response);
                             
 
                             Object.entries(feedback).forEach(function ([stepNumber, feedbackContent]) {
@@ -641,49 +619,11 @@
                 document.getElementById('feedback_modal_background').removeEventListener('click', closeFeedbackModal);
             }
 
-            // // Function to view hint and append dummy code to editor
-            // function viewHint() {
-            //     appendDummyCodeToEditor();
-            //     closeFeedbackModal();
-            // }
-
             // Event listener for code review button
             var reviewButton = document.getElementById('review_button');
             if (reviewButton) {
                 reviewButton.addEventListener('click', openModal);
             }
-
-            // function get_user_code() {
-            //     // This line allows you to execute only the selected part of the code.
-            //     // But it may cause confusion to students, so it is disabled.
-            //     var user_code = editor.getValue().trim();
-            //     return user_code;
-            // }
-
-            // function appendDummyCodeToEditor() {
-            //     // Get the selected step from the dropdown
-            //     var selectedStep = document.getElementById('step_dropdown').value;
-
-            //     // Get the existing code from the editor
-            //     var existingCode = editor.getValue.trim();
-
-            //      // Dummy data to be appended to the code editor
-            //     var dummyCode = `
-            //         // hint
-            //         function dummyFunction() {
-            //             console.log('This is dummy code.');
-            //         }
-            //     `;
-
-            //     // Combine existing code and dummy code
-            //     var updatedCode = existingCode + dummyCode;
-
-            //     // Set the updated code in the editor
-            //     editor.setValue(updatedCode);
-
-            //     // Close the modal (not needed right now)
-            //     // closeModal();
-            // }
 
             // Function to open the feedback modal
             function openFeedbackModal() {
@@ -725,49 +665,6 @@
                         // Handle the error message here if needed
                     });
                 };
-                
-                /*var selectedStep = "Step 1";
-                var feedback = 'You have completed Step 1. Great job! \n'  + 
-                                'Step 2 is incomplete \n' + 
-                                'Step 3 is incomplete \n' +
-                                'Step 4 is incomplete \n' +
-                                'Step 5 is incomplete \n' +
-                                'Step 6 is incomplete \n'+
-                                'Step 7 is incomplete \n' +
-                                'Step 8 is incomplete \n' +
-                                'Step 9 is incomplete \n' +
-                                'Step 10 is incomplete \n' +
-                                'Step 11 is incomplete \n' +
-                                'Step 12 is incomplete \n' +
-                                'Step 13 is incomplete' */;
-
-/*                 if (selectedStep == "Step 1") {
-                    feedback = "You have completed Step 1. Great job!"
-                    
-                    // Add a completed flag
-                    var step1Completed = true;
-                } else if (selectedStep == "Step 2") {
-                    feedback = "You have completed Step 2. Well done!"
-
-                    var step2Completed = true;
-                } else {
-                    feedback = "It looks like you're on a different step. Make sure to follow the instructions and complete each step in order."
-                } */
-
-                // Open the feedback modal and display the feedback
-                // openFeedbackModal(feedback);
-
-                // Update the step dropdown HTML element
-                //var stepDropdown = document.getElementById("dropdown-content");
-
-                // Update the style for each step based on the completed flag
-/*                 if (step1Completed) {
-                    var firstStep = stepDropdown.children[0];
-                    firstStep.style.textDecoration = "line-through";
-                }
-                if (step2Completed) {
-                    stepDropdown.children.style.textDecoration = "line-through";
-                } */
             }
             </script>
 
