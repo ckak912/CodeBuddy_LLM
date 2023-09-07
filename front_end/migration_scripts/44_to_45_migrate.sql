@@ -1,0 +1,3 @@
+ALTER TABLE LLM_stuff
+ADD COLUMN pseudo_code JSON NOT NULL DEFAULT '{}';
+
