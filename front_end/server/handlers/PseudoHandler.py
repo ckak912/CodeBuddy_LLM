@@ -3,13 +3,12 @@ import json
 import requests
 import os
 
-class FeedbackHandler(BaseUserHandler):
+class PseudoHandler(BaseUserHandler):
     async def post(self, exercise_id, course_id, assignment_id):
         try:
-            exercise_feedback = self.content.retrieve_llm_feedback(exercise_id, course_id, assignment_id)
-            if not exercise_feedback:
-                print("hello this is the feedback handler")
-
+            pseudo_code = self.content.retrieve_pseudo_code(exercise_id, course_id, assignment_id)
+            if not pseudo_code:
+                print("hello this is the pseudo code handler")
 
                 secrets_dict = load_yaml_dict(read_file("secrets/front_end.yaml"))
                 OPEN_AI_API_KEY = secrets_dict["openAI_api_key"]
@@ -71,24 +70,11 @@ class FeedbackHandler(BaseUserHandler):
                 main()
                 '''
                 model_prompt = '''
-                You have been given the role of a educator providing feedback to students. You have been given the model solution that has a complete implementation of this exercise. This solution contains comments (e.g. "Step 1: Define the average_grade_calculator function") that preceed the code required to satisfy that step. 
-                Use this model solution as a guideline to help you provide feedback on the student code.
-
-                Structure your response as follows:
-
-                JSON Format:
-
-                "Step n Feedback":"feedback", for each step n
-
-                - If the student code has equivalent functionality to the corresponding code within the model solution , for feedback simply write "You have completed step n".
-                        
-                - If the student code doesn't have equivalent functionality to the corresponding code within the model solution, explain what is missing using purely natural language.
-
-                - Ensure that you provide feedback for the student code against each step of the model solution, even if there isn't relevant code to compare.
-                '''
-
+                Given the current state of the user code, and the step by step process provided, USE ONLY PSEUDO CODE to show how to complete the next step'''
                 # get the user's current code implementation
                 user_code = self.get_body_argument("user_code").replace("\r", "")
+
+                # get the static step process file 
                 step_process = self.get_body_argument("step_process")
 
                 headers = {
@@ -99,16 +85,16 @@ class FeedbackHandler(BaseUserHandler):
                 data = {
                     'model': 'gpt-3.5-turbo',
                     'messages': [
-                        {'role': 'user', 'content': 'Step Process:\n' + step_process + 'Model Solution (the rubric):\n' + full_solution + '\n\n' + model_prompt + '\n\n' + 'Student Code (this is what you provide feedback for):\n' + user_code}
-                    ],
-                    'temperature': 0.8
+                        {'role': 'user', 'content': user_code},
+                        {'role': 'assistant', 'content': step_process },
+                        {'role': 'user', 'content': model_prompt},
+                        {'role': 'user', 'content': pseudo_code}                     ],
+                    'temperature': 0.7,
+                    'max_tokens': 150  # Adjust the max tokens as needed
                 }
 
                 response = requests.post(API_URL, headers=headers, json=data)
                 result = response.json()
-
-                # Assuming 'result' is the API response
-                feedback = None
 
                 # Check if the 'choices' key exists in the response
                 if 'choices' in result:
@@ -121,19 +107,19 @@ class FeedbackHandler(BaseUserHandler):
 
                         # Check if the 'content' key exists in the message
                         if 'content' in message:
-                            feedback = message['content']
+                            pseudo_code = message['content']
 
-                if feedback:
-                    feedback = feedback.replace(r'\n', '\n')
-                    print("this is the exercise_feedback:", feedback)
+                if pseudo_code:
+                    pseudo_code = pseudo_code.replace(r'\n', '\n')
+                    print("this is the pseudo code:\n", pseudo_code)
 
-                feedback_json = self.write(json.dumps(feedback))
+                pseudo_json = self.write(json.dumps(pseudo_code))
                 # You can store the assistant's reply in the database or perform any other desired action here
-                self.content.store_llm_feedback(feedback, exercise_id, course_id, assignment_id)
+                self.content.store_pseudo_code(pseudo_json, exercise_id, course_id, assignment_id)
             else:
-                print("exercise feedback is in the database")
+                print("pseudo code is in the database")
 
         except Exception as inst:
-            print("Exception:", inst)
+            print("Pseudo Handler Exception:", inst)
             self.set_status(500)
-            self.finish({"error": "Failed to fetch exercise feedback."})
+            self.finish({"error": "Failed to fetch pseudo code."})
