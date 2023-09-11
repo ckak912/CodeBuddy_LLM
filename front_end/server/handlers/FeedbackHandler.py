@@ -1,18 +1,21 @@
 from BaseUserHandler import *
 import json
 import requests
+import os
 
 class FeedbackHandler(BaseUserHandler):
-    async def get(self, exercise_id, course_id, assignment_id):
+    async def post(self, exercise_id, course_id, assignment_id):
         try:
             exercise_feedback = self.content.retrieve_llm_feedback(exercise_id, course_id, assignment_id)
-            
             if not exercise_feedback:
-                print("xoxo")
+                print("hello this is the feedback handler")
+
+
                 secrets_dict = load_yaml_dict(read_file("secrets/front_end.yaml"))
                 OPEN_AI_API_KEY = secrets_dict["openAI_api_key"]
 
                 API_URL = 'https://api.openai.com/v1/chat/completions'
+
                 full_solution = '''
                 # Step 1: Define the calculate_average_grade function
                 def calculate_average_grade(grades):
@@ -84,16 +87,10 @@ class FeedbackHandler(BaseUserHandler):
                 - Ensure that you provide feedback for the student code against each step of the model solution, even if there isn't relevant code to compare.
                 '''
 
-                # this value should be stored in the database and fetched
-                # using a content method. Will need a new migr
-                user_code = '''
-                def calculate_average_grade(grades):
-                    sum = 0
-                    for grade in grades:
-                        sum += grade
-                    return sum/len(grades) 
-                '''
-                
+                # get the user's current code implementation
+                user_code = self.get_body_argument("user_code").replace("\r", "")
+                step_process = self.get_body_argument("step_process")
+
                 headers = {
                     'Content-Type': 'application/json',
                     'Authorization': f'Bearer {OPEN_AI_API_KEY}'
@@ -102,28 +99,37 @@ class FeedbackHandler(BaseUserHandler):
                 data = {
                     'model': 'gpt-3.5-turbo',
                     'messages': [
-                        {'role': 'user', 'content': user_code},
-                        {'role': 'assistant', 'content': full_solution},
-                        {'role': 'user', 'content': model_prompt}
+                        {'role': 'user', 'content': 'Step Process:\n' + step_process + 'Model Solution (the rubric):\n' + full_solution + '\n\n' + model_prompt + '\n\n' + 'Student Code (this is what you provide feedback for):\n' + user_code}
                     ],
-                    'temperature': 0.7,
-                    'max_tokens': 150  # Adjust the max tokens as needed
+                    'temperature': 0.8
                 }
 
                 response = requests.post(API_URL, headers=headers, json=data)
                 result = response.json()
 
-                # Extract step numbers and content using regex
-                regex = r'"Step (\d+) Feedback": "([^"]+)"'
-                steps = {}
-                for match in re.finditer(regex, result['choices'][0]['message']['content']):
-                    step_number = match.group(1)
-                    step_content = match.group(2)
-                    steps[step_number] = step_content.strip()
+                # Assuming 'result' is the API response
+                feedback = None
 
-                exercise_feedback_json_str = self.write(json.dumps(steps))
+                # Check if the 'choices' key exists in the response
+                if 'choices' in result:
+                    # Get the first choice (index 0) from the 'choices' list
+                    first_choice = result['choices'][0]
+
+                    # Check if the 'message' key exists in the first choice
+                    if 'message' in first_choice:
+                        message = first_choice['message']
+
+                        # Check if the 'content' key exists in the message
+                        if 'content' in message:
+                            feedback = message['content']
+
+                if feedback:
+                    feedback = feedback.replace(r'\n', '\n')
+                    print("this is the exercise_feedback:", feedback)
+
+                feedback_json = self.write(json.dumps(feedback))
                 # You can store the assistant's reply in the database or perform any other desired action here
-                self.content.store_llm_feedback(exercise_feedback_json_str, exercise_id, course_id, assignment_id)
+                self.content.store_llm_feedback(feedback, exercise_id, course_id, assignment_id)
             else:
                 print("exercise feedback is in the database")
 
