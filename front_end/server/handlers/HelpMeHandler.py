@@ -73,7 +73,6 @@ class HelpMeHandler(BaseUserHandler):
                 if hint_code_match:
                     hint_code = hint_code_match.group(1)
                     hint_code = hint_code.replace(r'\n', '\n')
-                    print(hint_code)
                 
                 hint_code_json = self.write(json.dumps(hint_code))
                 self.content.store_hint_code(hint_code_json, exercise_id, course_id, assignment_id)
@@ -81,5 +80,7 @@ class HelpMeHandler(BaseUserHandler):
                 print("hint code is in the database")
                 
         except Exception as inst:
+            print("hint code handler error:", inst)
+
             self.set_status(500)
             self.finish({"error": "Failed to fetch hint code."})

@@ -55,6 +55,7 @@ def make_app(settings_dict):
             url(r"/exercise/([^/]+)/([^/]+)/([^/]+)", ExerciseHandler, name="exercise"),
             url(r"/exercise_feedback/([^/]+)/([^/]+)/([^/]+)", FeedbackHandler, name="exercise_feedback"),
             url(r"/exercise_hint_code/([^/]+)/([^/]+)/([^/]+)", HelpMeHandler, name="exercise_hint_code"),
+            url(r"/exercise_pseudo_code/([^/]+)/([^/]+)/([^/]+)", WhatsNextHandler, name="exercise_pseudo_code"),
             url(r"/exercise_submissions/([^/]+)/([^/]+)/([^/]+)", ExerciseSubmissionsHandler, name="exercise_submissions"),
             url(r"/export_assignment/([^/]+)/([^/]+)", ExportAssignmentHandler, name="export_assignment"),
             url(r"/external/([^/]+)/([^/]+)/(.+)", ExternalSiteHandler, name="external"),

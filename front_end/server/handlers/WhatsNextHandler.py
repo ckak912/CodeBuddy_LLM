@@ -7,8 +7,8 @@ class WhatsNextHandler(BaseUserHandler):
         try:
             pseudo_code = self.content.retrieve_pseudo_code(exercise_id, course_id, assignment_id)
 
-            if not exercise_hint_code:
-
+            if not pseudo_code:
+                    
                 secrets_dict = load_yaml_dict(read_file("secrets/front_end.yaml"))
                 OPEN_AI_API_KEY = secrets_dict["openAI_api_key"]
 
@@ -53,21 +53,23 @@ class WhatsNextHandler(BaseUserHandler):
                 response = requests.post(API_URL, headers=headers, json=data)
                 result = response.json()
 
-                # # Extract the hint code using regex
-                # hint_code_regex = r"'content': '([^']+)'"
-                # hint_code_match = re.search(hint_code_regex, str(result))
+                # Extract the hint code using regex
+                pseudo_code_regex = r"'content': '([^']+)'"
+                pseudo_code_match = re.search(pseudo_code_regex, str(result))
 
-                # # Check if a match was found and get the hint code
-                # if hint_code_match:
-                #     hint_code = hint_code_match.group(1)
-                #     hint_code = hint_code.replace(r'\n', '\n')
-                #     print(hint_code)
-                
-                pseudo_code_json = self.write(json.dumps(pseudo_code_json))
+                # Check if a match was found and get the hint code
+                if pseudo_code_match:
+                    pseudo_code = pseudo_code_match.group(1)
+                    pseudo_code = pseudo_code.replace(r'\n', '\n')
+
+                pseudo_code_json = self.write(json.dumps(pseudo_code))
+
                 self.content.store_pseudo_code(pseudo_code_json, exercise_id, course_id, assignment_id)
             else:
                 print("pseudo code is in the database")
                 
         except Exception as inst:
+            print("pseudo code handler error:", inst)
+
             self.set_status(500)
             self.finish({"error": "Failed to fetch pseudo code."})

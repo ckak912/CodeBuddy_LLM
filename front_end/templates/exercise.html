@@ -325,9 +325,8 @@
 
                 // Function to generate dropdown items dynamically
                  function generateDropdownItems(tool_feature) {
-                    id="help" 
                     var helpButton = document.getElementById("help");
-                    var url = `/exercise_IDK/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}/{{ exercise_basics['id'] }}`;
+                    var url = `/exercise_hint_code/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}/{{ exercise_basics['id'] }}`;
 
                     reviewButton.onclick = function() {
                     $.ajax({
@@ -488,57 +487,69 @@
 
                     
                 function generate_help(stepProcessGen) {
-                    const OPENAI_API_KEY = '';
-                    const apiUrl = 'https://api.openai.com/v1/chat/completions';
+                    // const OPENAI_API_KEY = '';
+                    // const apiUrl = 'https://api.openai.com/v1/chat/completions';
 
 
-                    const model_prompt =`Given the current state of the user code, and the step process provided, use pseudo code to show how to complete the current step`
+                    // const model_prompt =`Given the current state of the user code, and the step process provided, use pseudo code to show how to complete the current step`
 
-                    var userCodes = editor.getValue().trim();
+                    // var userCodes = editor.getValue().trim();
 
-                    const headers = {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${OPENAI_API_KEY}`
-                    };
+                    // const headers = {
+                    // 'Content-Type': 'application/json',
+                    // 'Authorization': `Bearer ${OPENAI_API_KEY}`
+                    // };
 
-                    const data = {
-                    model: 'gpt-3.5-turbo',
-                    messages: [{ role: 'user', content: stepProcessGen + '\n\n' + userCodes + '\n\n' + model_prompt}],
-                    temperature: 0.7
-                    };
+                    // const data = {
+                    // model: 'gpt-3.5-turbo',
+                    // messages: [{ role: 'user', content: stepProcessGen + '\n\n' + userCodes + '\n\n' + model_prompt}],
+                    // temperature: 0.7
+                    // };
 
-                    fetch(apiUrl, {
-                    method: 'POST',
-                    headers,
-                    body: JSON.stringify(data)
-                    })
-                    .then(response => response.json())
-                    .then(result => {
-                        // Assuming the API response is stored in 'response' variable
-                        const apiResponseNext = result.choices[0].message.content;
+                    // fetch(apiUrl, {
+                    // method: 'POST',
+                    // headers,
+                    // body: JSON.stringify(data)
+                    // })
+                    // .then(response => response.json())
+                    // .then(result => {
+                    //     // Assuming the API response is stored in 'response' variable
+                    //     const apiResponseNext = result.choices[0].message.content;
 
-                        var whatsNextContent = document.getElementById("id_whatsnext");
-                        whatsNextContent.textContent = apiResponseNext;
+                    //     var whatsNextContent = document.getElementById("id_whatsnext");
+                    //     whatsNextContent.textContent = apiResponseNext;
 
                         
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        // Handle any errors here
-                    });
+                    // })
+                    // .catch(error => {
+                    //     console.error(error);
+                    //     // Handle any errors here
+                    // });
 
-                    // hit the hint code endpoint on click event 
+                    // TODO: integrate this parallel call to the pseudo and hint code endpoint 
+                    var pseudoCodeUrl = `/exercise_pseudo_code/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}/{{ exercise_basics['id'] }}`;
+                    var hintCodeUrl = `/exercise_hint_code/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}/{{ exercise_basics['id'] }}`;
+
                     var hintBtn = document.getElementById("hint_button_id");
-                    var url = `/exercise_hint_code/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}/{{ exercise_basics['id'] }}`;
+
                     hintBtn.onclick = function () {
-                        $.ajax({
-                            type: 'GET',
-                            url: url,
-                        })
-                        .done(function(response) {
+                        $.when(
+                            $.ajax({
+                                type: 'GET',
+                                url: pseudoCodeUrl,
+                            }),
+                            $.ajax({
+                                type: 'GET',
+                                url: hintCodeUrl
+                            })
+                        )
+                        .done(function(pseudoCodeResponse, hintCodeResponse) {
                             try {
-                                var jsonHintCode = JSON.parse(response);
-                                console.log(jsonHintCode)
+                                var jsonHintCode = JSON.parse(hintCodeResponse[0]);
+                                var jsonPseudoCode = JSON.parse(pseudoCodeResponse[0]);
+
+                                console.log(`Pseudo Code: ${jsonPseudoCode}`);
+                                console.log(`Hint Code: ${jsonHintCode}`);
                             } catch (e) {
                                 console.error("Error parsing JSON response:", e)
                             }
