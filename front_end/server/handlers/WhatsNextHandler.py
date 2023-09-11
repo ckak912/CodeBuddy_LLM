@@ -2,20 +2,21 @@ from BaseUserHandler import *
 import json
 import requests
 
-class HelpMeHandler(BaseUserHandler):
+class WhatsNextHandler(BaseUserHandler):
     async def get(self, exercise_id, course_id, assignment_id):
         try:
-            exercise_hint_code = self.content.retrieve_hint_code(exercise_id, course_id, assignment_id)
+            pseudo_code = self.content.retrieve_pseudo_code(exercise_id, course_id, assignment_id)
 
-            if not exercise_hint_code:
-
+            if not pseudo_code:
+                    
                 secrets_dict = load_yaml_dict(read_file("secrets/front_end.yaml"))
                 OPEN_AI_API_KEY = secrets_dict["openAI_api_key"]
 
                 API_URL = 'https://api.openai.com/v1/chat/completions'
 
                 user_code = '''
-                def calculate_average_grade(grades):`
+                def calculate_average_grade(grades): 
+                    sum = 0
                 '''
                 step_process = '''
                 "1": "Start by defining the calculate_average_grade function that takes an array of subject grades as input. ",
@@ -29,20 +30,8 @@ class HelpMeHandler(BaseUserHandler):
                 "9": "Call the provide_feedback function with the average grade as input and display the feedback to the user. ",
                 "10": "Test the program thoroughly with different inputs to ensure that it handles errors gracefully and provides accurate feedback."
                 '''
-
-                next_step = '''
-                Loop through the grades array:
-                - For each grade in grades:
-                - Add the grade to the sum variable
-
-                Calculate the average grade:
-                - Divide the sum by the length of the grades array
-
-                Return the average grade
-                '''
-
                 model_prompt = '''
-                Given the current state of the user code, the step process provided, and the psuedo code for the current step, generate the next line of code that will help a student on the current step
+                Given the current state of the user code, and the step process provided, use pseudo code to show how to complete the current step
                 '''
                 
                 headers = {
@@ -54,9 +43,8 @@ class HelpMeHandler(BaseUserHandler):
                     'model': 'gpt-3.5-turbo',
                     'messages': [
                         {'role': 'user', 'content': user_code},
-                        {'role': 'assistant', 'content': step_process },
                         {'role': 'user', 'content': model_prompt},
-                        {'role': 'user', 'content': next_step}
+                        {'role': 'user', 'content': step_process},
                     ],
                     'temperature': 0.7,
                     'max_tokens': 150  # Adjust the max tokens as needed
@@ -66,21 +54,22 @@ class HelpMeHandler(BaseUserHandler):
                 result = response.json()
 
                 # Extract the hint code using regex
-                hint_code_regex = r"'content': '([^']+)'"
-                hint_code_match = re.search(hint_code_regex, str(result))
+                pseudo_code_regex = r"'content': '([^']+)'"
+                pseudo_code_match = re.search(pseudo_code_regex, str(result))
 
                 # Check if a match was found and get the hint code
-                if hint_code_match:
-                    hint_code = hint_code_match.group(1)
-                    hint_code = hint_code.replace(r'\n', '\n')
-                
-                hint_code_json = self.write(json.dumps(hint_code))
-                self.content.store_hint_code(hint_code_json, exercise_id, course_id, assignment_id)
+                if pseudo_code_match:
+                    pseudo_code = pseudo_code_match.group(1)
+                    pseudo_code = pseudo_code.replace(r'\n', '\n')
+
+                pseudo_code_json = self.write(json.dumps(pseudo_code))
+
+                self.content.store_pseudo_code(pseudo_code_json, exercise_id, course_id, assignment_id)
             else:
-                print("hint code is in the database")
+                print("pseudo code is in the database")
                 
         except Exception as inst:
-            print("hint code handler error:", inst)
+            print("pseudo code handler error:", inst)
 
             self.set_status(500)
-            self.finish({"error": "Failed to fetch hint code."})
+            self.finish({"error": "Failed to fetch pseudo code."})
