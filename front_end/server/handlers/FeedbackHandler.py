@@ -1,7 +1,9 @@
-from BaseUserHandler import *
 import json
-import requests
 import os
+
+import requests
+from BaseUserHandler import *
+
 
 class FeedbackHandler(BaseUserHandler):
     async def post(self, exercise_id, course_id, assignment_id):
@@ -74,17 +76,17 @@ class FeedbackHandler(BaseUserHandler):
                 You have been given the role of a educator providing feedback to students. You have been given the model solution that has a complete implementation of this exercise. This solution contains comments (e.g. "Step 1: Define the average_grade_calculator function") that preceed the code required to satisfy that step. 
                 Use this model solution as a guideline to help you provide feedback on the student code.
 
-                Structure your response as follows:
+                Structure your response in the format like below:
 
-                JSON Format:
-
-                "Step n Feedback":"feedback", for each step n
+                "n: 'feedbackContent'",
+                ...
+                for each step 'n'
 
                 - If the student code has equivalent functionality to the corresponding code within the model solution , for feedback simply write "You have completed step n".
                         
-                - If the student code doesn't have equivalent functionality to the corresponding code within the model solution, explain what is missing using purely natural language.
+                - If the student code doesn't have equivalent functionality to the corresponding code within the model solution, explain what is missing using purely natural language, NO CODE.
 
-                - Ensure that you provide feedback for the student code against each step of the model solution, even if there isn't relevant code to compare.
+                - Ensure that you provide feedback for the current state of the student code against the comments in the rubric, even if there isn't relevant code to compare.
                 '''
 
                 # get the user's current code implementation
@@ -107,29 +109,15 @@ class FeedbackHandler(BaseUserHandler):
                 response = requests.post(API_URL, headers=headers, json=data)
                 result = response.json()
 
-                # Assuming 'result' is the API response
-                feedback = None
+                feedback = result['choices'][0]['message']['content']
 
-                # Check if the 'choices' key exists in the response
-                if 'choices' in result:
-                    # Get the first choice (index 0) from the 'choices' list
-                    first_choice = result['choices'][0]
+                print(feedback)
 
-                    # Check if the 'message' key exists in the first choice
-                    if 'message' in first_choice:
-                        message = first_choice['message']
-
-                        # Check if the 'content' key exists in the message
-                        if 'content' in message:
-                            feedback = message['content']
-
-                if feedback:
-                    feedback = feedback.replace(r'\n', '\n')
-                    print("this is the exercise_feedback:", feedback)
-
+                # Convert the new_feedback dictionary back to JSON format
                 feedback_json = self.write(json.dumps(feedback))
+
                 # You can store the assistant's reply in the database or perform any other desired action here
-                self.content.store_llm_feedback(feedback, exercise_id, course_id, assignment_id)
+                self.content.store_llm_feedback(feedback_json, exercise_id, course_id, assignment_id)
             else:
                 print("exercise feedback is in the database")
 

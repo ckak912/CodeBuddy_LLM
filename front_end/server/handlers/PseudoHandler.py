@@ -1,10 +1,12 @@
-from BaseUserHandler import *
 import json
-import requests
 import os
 
+import requests
+from BaseUserHandler import *
+
+
 class PseudoHandler(BaseUserHandler):
-    async def post(self, exercise_id, course_id, assignment_id):
+    async def get(self, exercise_id, course_id, assignment_id):
         try:
             pseudo_code = self.content.retrieve_pseudo_code(exercise_id, course_id, assignment_id)
             if not pseudo_code:
@@ -73,6 +75,8 @@ class PseudoHandler(BaseUserHandler):
                 Given the current state of the user code, and the step by step process provided, USE ONLY PSEUDO CODE to show how to complete the next step'''
                 # get the user's current code implementation
                 user_code = self.get_body_argument("user_code").replace("\r", "")
+
+                print("This is user code within the handler: ",user_code)
 
                 # get the static step process file 
                 step_process = self.get_body_argument("step_process")

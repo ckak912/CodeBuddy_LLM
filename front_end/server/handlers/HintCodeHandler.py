@@ -1,6 +1,8 @@
-from BaseUserHandler import *
 import json
+
 import requests
+from BaseUserHandler import *
+
 
 class HintCodeHandler(BaseUserHandler):
     async def get(self, exercise_id, course_id, assignment_id):
