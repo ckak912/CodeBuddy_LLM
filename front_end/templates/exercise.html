@@ -542,13 +542,13 @@
                         hintBtn.onclick = function () {
                             $.when(
                                 $.ajax({
-                                    type: 'GET', // Changed request type to POST
+                                    type: 'POST', // Changed request type to POST
                                     url: pseudoCodeUrl,
                                     data: postData,
                                     async: true,
                                 }),
                                 $.ajax({
-                                    type: 'GET', // Changed request type to POST
+                                    type: 'POST', // Changed request type to POST
                                     url: hintCodeUrl,
                                     data: postData,
                                     async: true,
@@ -559,8 +559,11 @@
                                     var jsonHintCode = JSON.parse(hintCodeResponse[0]);
                                     var jsonPseudoCode = JSON.parse(pseudoCodeResponse[0]);
 
-                                    console.log(`Pseudo Code: ${jsonPseudoCode}`);
-                                    console.log(`Hint Code: ${jsonHintCode}`);
+                                    whatsNextContent = document.getElementById('id_whatsnext');
+                                    whatsNextContent.textContent = jsonPseudoCode;
+
+                                    editor.setValue(editor.getValue() + '\n' + jsonHintCode);
+
                                 } catch (e) {
                                     console.error("Error parsing JSON response:", e)
                                 }

@@ -6,7 +6,7 @@ from BaseUserHandler import *
 
 
 class PseudoHandler(BaseUserHandler):
-    async def get(self, exercise_id, course_id, assignment_id):
+    async def post(self, exercise_id, course_id, assignment_id):
         try:
             pseudo_code = self.content.retrieve_pseudo_code(exercise_id, course_id, assignment_id)
             if not pseudo_code:
@@ -72,7 +72,7 @@ class PseudoHandler(BaseUserHandler):
                 main()
                 '''
                 model_prompt = '''
-                Given the current state of the user code, and the step by step process provided, USE ONLY PSEUDO CODE to show how to complete the next step'''
+                Given the current state of the user code, and the full solution provided, USE ONLY PSEUDO CODE to show how to complete the step the student is currently on'''
                 # get the user's current code implementation
                 user_code = self.get_body_argument("user_code").replace("\r", "")
 
@@ -89,33 +89,15 @@ class PseudoHandler(BaseUserHandler):
                 data = {
                     'model': 'gpt-3.5-turbo',
                     'messages': [
-                        {'role': 'user', 'content': user_code},
-                        {'role': 'assistant', 'content': step_process },
-                        {'role': 'user', 'content': model_prompt},
-                        {'role': 'user', 'content': pseudo_code}                     ],
+                        {'role': 'user', 'content': 'User Code (used to know what step the user is currently on): \n' + user_code + '\n' + 'Full solution rubric (used to compare against the user code to generate pseudo code): \n' + full_solution + '\n' + model_prompt}
+                       ],
                     'temperature': 0.7,
-                    'max_tokens': 150  # Adjust the max tokens as needed
                 }
 
                 response = requests.post(API_URL, headers=headers, json=data)
                 result = response.json()
 
-                # Check if the 'choices' key exists in the response
-                if 'choices' in result:
-                    # Get the first choice (index 0) from the 'choices' list
-                    first_choice = result['choices'][0]
-
-                    # Check if the 'message' key exists in the first choice
-                    if 'message' in first_choice:
-                        message = first_choice['message']
-
-                        # Check if the 'content' key exists in the message
-                        if 'content' in message:
-                            pseudo_code = message['content']
-
-                if pseudo_code:
-                    pseudo_code = pseudo_code.replace(r'\n', '\n')
-                    print("this is the pseudo code:\n", pseudo_code)
+                pseudo_code = result['choices'][0]['message']['content']
 
                 pseudo_json = self.write(json.dumps(pseudo_code))
                 # You can store the assistant's reply in the database or perform any other desired action here

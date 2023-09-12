@@ -1,18 +1,20 @@
-from concurrent_log_handler import ConcurrentRotatingFileHandler
-from distutils.log import debug
-from content import *
 import contextvars
-from datetime import datetime
-from handlers import *
-from helper import *
 import logging
 import os
 import sys
-from tornado.auth import GoogleOAuth2Mixin
-import tornado.ioloop
-from tornado.web import *
 import traceback
+from datetime import datetime
+from distutils.log import debug
+
+import tornado.ioloop
 import ui_methods
+from concurrent_log_handler import ConcurrentRotatingFileHandler
+from content import *
+from handlers import *
+from helper import *
+from tornado.auth import GoogleOAuth2Mixin
+from tornado.web import *
+
 
 class BaseHandler(RequestHandler):
     def set_default_headers(self):
@@ -54,8 +56,8 @@ def make_app(settings_dict):
             url(r"/edit_exercise/([^/]+)/([^/]+)/([^/]+)?", EditExerciseHandler, name="edit_exercise"),
             url(r"/exercise/([^/]+)/([^/]+)/([^/]+)", ExerciseHandler, name="exercise"),
             url(r"/exercise_feedback/([^/]+)/([^/]+)/([^/]+)", FeedbackHandler, name="exercise_feedback"),
-            url(r"/exercise_hint_code/([^/]+)/([^/]+)/([^/]+)", HelpMeHandler, name="exercise_hint_code"),
-            url(r"/exercise_pseudo_code/([^/]+)/([^/]+)/([^/]+)", WhatsNextHandler, name="exercise_pseudo_code"),
+            url(r"/exercise_hint_code/([^/]+)/([^/]+)/([^/]+)", HintCodeHandler, name="exercise_hint_code"),
+            url(r"/exercise_pseudo_code/([^/]+)/([^/]+)/([^/]+)", PseudoHandler, name="exercise_pseudo_code"),
             url(r"/exercise_submissions/([^/]+)/([^/]+)/([^/]+)", ExerciseSubmissionsHandler, name="exercise_submissions"),
             url(r"/export_assignment/([^/]+)/([^/]+)", ExportAssignmentHandler, name="export_assignment"),
             url(r"/external/([^/]+)/([^/]+)/(.+)", ExternalSiteHandler, name="external"),
