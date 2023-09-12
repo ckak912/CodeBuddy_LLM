@@ -72,7 +72,10 @@ class PseudoHandler(BaseUserHandler):
                 main()
                 '''
                 model_prompt = '''
-                Given the current state of the user code, and the full solution provided, USE ONLY PSEUDO CODE to show how to complete the step the student is currently on'''
+                You have been given the role of a lecture that provides pseudo code that helps students complete the step
+                they're currently stuck on. It is important that the response you give isn't in python syntax, only natural language explanation.
+                The current state of the user code is provided below along with the rubric. Ensure that you use the user code provided to understand what step the student is stuck on.
+                From there you can use the provided step process details to generate some pseudo code to help them complete that current step. The pseudo code should be concise to ensure it can be displayed nicely within UI'''
                 # get the user's current code implementation
                 user_code = self.get_body_argument("user_code").replace("\r", "")
 
@@ -89,7 +92,7 @@ class PseudoHandler(BaseUserHandler):
                 data = {
                     'model': 'gpt-3.5-turbo',
                     'messages': [
-                        {'role': 'user', 'content': 'User Code (used to know what step the user is currently on): \n' + user_code + '\n' + 'Full solution rubric (used to compare against the user code to generate pseudo code): \n' + full_solution + '\n' + model_prompt}
+                        {'role': 'user', 'content': model_prompt + '\nUser Code:\n' + user_code + '\n' + 'Step Process: \n' + step_process}
                        ],
                     'temperature': 0.7,
                 }

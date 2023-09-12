@@ -27,7 +27,10 @@ class HintCodeHandler(BaseUserHandler):
                 pseudo_code = self.content.retrieve_pseudo_code(exercise_id, course_id, assignment_id)
 
                 model_prompt = '''
-                Given the current state of the user code, and the full solution rubric provided , generate the next line of code that will help a student on the current step
+                You have been given the role of a lecturer that provides help to students on their programming tasks. This help is in the form
+                of generating the next line of code for a student when they are stuck on a given step. Use the user code to understand what step 
+                the student is currently stuck on. Then use the step process provided as a guideline to generate the next line of code to help the student
+                complete that step. It is important here to ONLY generate the next line, not the entire step.
                 '''
 
                 full_solution = '''
@@ -93,7 +96,7 @@ class HintCodeHandler(BaseUserHandler):
                 data = {
                     'model': 'gpt-3.5-turbo',
                     'messages': [
-                        {'role': 'user', 'content': 'Student Code (what you will provide the next line hint for): \n' + user_code + '\n' + 'Rubric Solution (used to know what the next line should be): \n' + full_solution + '\n' + model_prompt}
+                        {'role': 'user', 'content': model_prompt + '\n\nStudent Code:\n' + user_code + '\n\nStep Process:\n' + step_process}
                         ],
                     'temperature': 0.7,
                 }
