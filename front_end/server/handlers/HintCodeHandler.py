@@ -29,8 +29,8 @@ class HintCodeHandler(BaseUserHandler):
                 model_prompt = '''
                 You have been given the role of a lecturer that provides help to students on their programming tasks. This help is in the form
                 of generating the next line of code for a student when they are stuck on a given step. Use the user code to understand what step 
-                the student is currently stuck on. Then use the step process provided as a guideline to generate the next line of code to help the student
-                complete that step. It is important here to ONLY generate the next line, not the entire step.
+                the student is currently stuck on. Then use the Instructor Solution provided as a rubric to generate the next line of code to help the student
+                complete that step. Ensure that you only use the instructor solution code to compare functionality (the code comments are only used for structuring the code). It is important here to ONLY generate the next line, not the entire step.
                 '''
 
                 full_solution = '''
@@ -96,7 +96,7 @@ class HintCodeHandler(BaseUserHandler):
                 data = {
                     'model': 'gpt-3.5-turbo',
                     'messages': [
-                        {'role': 'user', 'content': model_prompt + '\n\nStudent Code:\n' + user_code + '\n\nStep Process:\n' + step_process}
+                        {'role': 'user', 'content': model_prompt + '\n\nStudent Code:\n' + user_code + '\n\nInstructor Solution:\n' + full_solution}
                         ],
                     'temperature': 0.7,
                 }

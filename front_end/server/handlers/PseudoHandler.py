@@ -71,11 +71,12 @@ class PseudoHandler(BaseUserHandler):
                 # Step 10: Test the program
                 main()
                 '''
+
+
                 model_prompt = '''
-                You have been given the role of a lecture that provides pseudo code that helps students complete the step
-                they're currently stuck on. It is important that the response you give isn't in python syntax, only natural language explanation.
-                The current state of the user code is provided below along with the rubric. Ensure that you use the user code provided to understand what step the student is stuck on.
-                From there you can use the provided step process details to generate some pseudo code to help them complete that current step. The pseudo code should be concise to ensure it can be displayed nicely within UI'''
+                You have been given the role of a lecture that help their students by providing pseudo code for the current step they're stuck on: a natural language explanation of the logical process required to complete the current step.
+                The user code has been provided below which you will use to discover what the current step is. The Instructor Solution is also provided which will give you an idea of what needs to change within the user code in order to complete
+                the current step the student is stuck on. Ensure that you only use the instructor solution code to compare functionality (the code comments are only used for structuring the code). Provide a response in the structure of a concise natural language explanation (that is summed up in one paragraph) of what is required to progress to the next logical step.'''
                 # get the user's current code implementation
                 user_code = self.get_body_argument("user_code").replace("\r", "")
 
@@ -92,7 +93,7 @@ class PseudoHandler(BaseUserHandler):
                 data = {
                     'model': 'gpt-3.5-turbo',
                     'messages': [
-                        {'role': 'user', 'content': model_prompt + '\nUser Code:\n' + user_code + '\n' + 'Step Process: \n' + step_process}
+                        {'role': 'user', 'content': model_prompt + '\nUser Code:\n' + user_code + '\n' + 'Instructor Solution: \n' + step_process}
                        ],
                     'temperature': 0.7,
                 }
