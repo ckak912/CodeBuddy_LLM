@@ -480,45 +480,6 @@
 
                     
                 async function generate_help(stepProcessGen) {
-                    // const OPENAI_API_KEY = '';
-                    // const apiUrl = 'https://api.openai.com/v1/chat/completions';
-
-
-                    // const model_prompt =`Given the current state of the user code, and the step process provided, use pseudo code to show how to complete the current step`
-
-                    // var userCodes = editor.getValue().trim();
-
-                    // const headers = {
-                    // 'Content-Type': 'application/json',
-                    // 'Authorization': `Bearer ${OPENAI_API_KEY}`
-                    // };
-
-                    // const data = {
-                    // model: 'gpt-3.5-turbo',
-                    // messages: [{ role: 'user', content: stepProcessGen + '\n\n' + userCodes + '\n\n' + model_prompt}],
-                    // temperature: 0.7
-                    // };
-
-                    // fetch(apiUrl, {
-                    // method: 'POST',
-                    // headers,
-                    // body: JSON.stringify(data)
-                    // })
-                    // .then(response => response.json())
-                    // .then(result => {
-                    //     // Assuming the API response is stored in 'response' variable
-                    //     const apiResponseNext = result.choices[0].message.content;
-
-                    //     var whatsNextContent = document.getElementById("id_whatsnext");
-                    //     whatsNextContent.textContent = apiResponseNext;
-
-                        
-                    // })
-                    // .catch(error => {
-                    //     console.error(error);
-                    //     // Handle any errors here
-                    // });
-
                     // TODO: integrate this parallel call to the pseudo and hint code endpoint 
                     var pseudoCodeUrl = `/exercise_pseudo_code/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}/{{ exercise_basics['id'] }}`;
                     var hintCodeUrl = `/exercise_hint_code/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}/{{ exercise_basics['id'] }}`;
@@ -535,18 +496,25 @@
                         const step_process = JSON.stringify(steps);
                         // Create an object with the data to send in the AJAX request
                         const postData = {"user_code": user_code, "step_process": step_process};
-
-
                         var hintBtn = document.getElementById("hint_button_id");
 
+                        $.ajax({
+                            type: 'POST', // Changed request type to POST
+                            url: pseudoCodeUrl,
+                            data: postData,
+                            async: true,
+                        })
+                        .done(function(pseudoCodeResponse) {
+                            var jsonPseudoCode = JSON.parse(pseudoCodeResponse);
+                            whatsNextContent = document.getElementById('id_whatsnext');
+                            whatsNextContent.textContent = jsonPseudoCode;
+                        })
+                        .fail(function(error) {
+                                console.error("AJAX error:", error);
+                            })
+                        
                         hintBtn.onclick = function () {
                             $.when(
-                                $.ajax({
-                                    type: 'POST', // Changed request type to POST
-                                    url: pseudoCodeUrl,
-                                    data: postData,
-                                    async: true,
-                                }),
                                 $.ajax({
                                     type: 'POST', // Changed request type to POST
                                     url: hintCodeUrl,
@@ -554,14 +522,10 @@
                                     async: true,
                                 })
                             )
-                            .done(function(pseudoCodeResponse, hintCodeResponse) {
+                            .done(function(hintCodeResponse) {
                                 try {
-                                    var jsonHintCode = JSON.parse(hintCodeResponse[0]);
-                                    var jsonPseudoCode = JSON.parse(pseudoCodeResponse[0]);
-
-                                    whatsNextContent = document.getElementById('id_whatsnext');
-                                    whatsNextContent.textContent = jsonPseudoCode;
-
+                                    var jsonHintCode = JSON.parse(hintCodeResponse);
+                                    
                                     editor.setValue(editor.getValue() + '\n' + jsonHintCode);
 
                                 } catch (e) {
