@@ -1,17 +1,12 @@
 import json
 import os
-
 import requests
 from BaseUserHandler import *
 
-
 class PseudoHandler(BaseUserHandler):
     async def post(self, exercise_id, course_id, assignment_id):
+        print("hello this is the pseudo code handler")
         try:
-            # pseudo_code = self.content.retrieve_pseudo_code(exercise_id, course_id, assignment_id)
-            # # if not pseudo_code:
-            print("hello this is the pseudo code handler")
-
             secrets_dict = load_yaml_dict(read_file("secrets/front_end.yaml"))
             OPEN_AI_API_KEY = secrets_dict["openAI_api_key"]
 
@@ -24,10 +19,9 @@ class PseudoHandler(BaseUserHandler):
             You have been given the role of a lecture that help their students by providing pseudo code for the current step they're stuck on: a natural language explanation of the logical process required to complete the current step.
             The user code has been provided below which you will use to discover what the current step is. The Instructor Solution is also provided which will give you an idea of what needs to change within the user code in order to complete
             the current step the student is stuck on. Ensure that you only use the instructor solution code to compare functionality (the code comments are only used for structuring the code). Provide a response in the structure of a concise natural language explanation (that is summed up in one paragraph) of what is required to progress to the next logical step.'''
+            
             # get the user's current code implementation
             user_code = self.get_body_argument("user_code").replace("\r", "")
-
-            print("This is user code within the handler: ",user_code)
 
             # # get the static step process file 
             # step_process = self.get_body_argument("step_process")
@@ -50,9 +44,9 @@ class PseudoHandler(BaseUserHandler):
 
             pseudo_code = result['choices'][0]['message']['content']
 
-            pseudo_json = self.write(json.dumps(pseudo_code))
-            # You can store the assistant's reply in the database or perform any other desired action here
-            self.content.store_pseudo_code(pseudo_json, exercise_id, course_id, assignment_id)
+            pseudo_code_json = self.write(json.dumps(pseudo_code))
+
+            self.content.store_pseudo_code(exercise_id, course_id, assignment_id, pseudo_code_json)
 
         except Exception as inst:
             print("Pseudo Handler Exception:", inst)

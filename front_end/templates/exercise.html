@@ -518,8 +518,8 @@
                     
                 async function generate_help() {
                     // TODO: integrate this parallel call to the pseudo and hint code endpoint 
-                    var pseudoCodeUrl = `/exercise_pseudo_code/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}/{{ exercise_basics['id'] }}`;
-                    var hintCodeUrl = `/exercise_hint_code/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}/{{ exercise_basics['id'] }}`;
+                    var pseudoCodeUrl = `/exercise_pseudo_code/{{ exercise_basics['id'] }}/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}`;
+                    var hintCodeUrl = `/exercise_hint_code/{{ exercise_basics['id'] }}/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}`;
 
                     var userCode = get_user_code();
                     if (user_code == "") {
@@ -637,7 +637,7 @@
 
             // Function to update feedback
             async function updateModal() {
-                var url = `/exercise_feedback/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}/{{ exercise_basics['id'] }}`;
+                var url = `/exercise_feedback/{{ exercise_basics['id'] }}/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}`;
                 //get the user code
                 var user_code = get_user_code();
                 if (user_code == "") {
