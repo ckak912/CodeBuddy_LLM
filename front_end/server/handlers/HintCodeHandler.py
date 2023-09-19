@@ -20,11 +20,11 @@ class HintCodeHandler(BaseUserHandler):
                 # get the user's current code implementation
                 user_code = self.get_body_argument("user_code").replace("\r", "")
 
-                # get the static step process file 
-                step_process = self.get_body_argument("step_process")
+                # # get the static step process file 
+                # step_process = self.get_body_argument("step_process")
 
-                # get the pseudo code from the database
-                pseudo_code = self.content.retrieve_pseudo_code(exercise_id, course_id, assignment_id)
+                # # get the pseudo code from the database
+                # pseudo_code = self.content.retrieve_pseudo_code(exercise_id, course_id, assignment_id)
 
                 model_prompt = '''
                 You have been given the role of a lecturer that provides help to students on their programming tasks. This help is in the form
@@ -33,60 +33,7 @@ class HintCodeHandler(BaseUserHandler):
                 complete that step. Ensure that you only use the instructor solution code to compare functionality (the code comments are only used for structuring the code). It is important here to ONLY generate the next line, not the entire step.
                 '''
 
-                full_solution = '''
-                # Step 1: Define the calculate_average_grade function
-                def calculate_average_grade(grades):
-                # Step 2: Calculate the sum of grades using a loop
-                total = 0
-                for grade in grades:
-                    total += grade
-
-                # Step 2 (continued): Calculate the average by dividing the sum by the number of grades
-                average = total / len(grades)
-
-                # Return the average grade
-                return average
-
-                # Step 3: Define the provide_feedback function
-                def provide_feedback(average_grade):
-
-                # Step 4: Use conditional statements to provide feedback based on the average grade
-                if average_grade < 40:
-                    print("You need to improve your performance.")
-                elif average_grade >= 40 and average_grade <= 70:
-                    print("Your performance is satisfactory.")
-                else:
-                    print("You have excelled in your studies.")
-
-                # Step 5: Implement the main program
-                def main():
-
-                # Step 5: Prompt the user to enter the number of subjects
-                num_subjects = int(input("Enter the number of subjects: "))
-
-                # Step 6: Create an empty array to hold the grades
-                grades = []
-
-                # Step 7: Prompt the user to enter the grades for each subject and add them to the array
-                for i in range(num_subjects):
-                    while True:
-                        try:
-                            grade = int(input("Enter the grade for subject {}: ".format(i+1)))
-                            break
-                        except ValueError:
-                            print("Invalid input. Please enter a valid grade.")
-
-                    grades.append(grade)
-
-                # Step 8: Call the calculate_average_grade function with the grades as input
-                average_grade = calculate_average_grade(grades)
-
-                # Step 9: Call the provide_feedback function with the average grade as input
-                provide_feedback(average_grade)
-
-                # Step 10: Test the program
-                main()
-                '''
+                full_solution =  self.get_body_argument("full_solution")
                 
                 headers = {
                     'Content-Type': 'application/json',

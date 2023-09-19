@@ -18,60 +18,8 @@ class FeedbackHandler(BaseUserHandler):
 
                 API_URL = 'https://api.openai.com/v1/chat/completions'
 
-                full_solution = '''
-                # Step 1: Define the calculate_average_grade function
-                def calculate_average_grade(grades):
-                # Step 2: Calculate the sum of grades using a loop
-                total = 0
-                for grade in grades:
-                    total += grade
-
-                # Step 2 (continued): Calculate the average by dividing the sum by the number of grades
-                average = total / len(grades)
-
-                # Return the average grade
-                return average
-
-                # Step 3: Define the provide_feedback function
-                def provide_feedback(average_grade):
-
-                # Step 4: Use conditional statements to provide feedback based on the average grade
-                if average_grade < 40:
-                    print("You need to improve your performance.")
-                elif average_grade >= 40 and average_grade <= 70:
-                    print("Your performance is satisfactory.")
-                else:
-                    print("You have excelled in your studies.")
-
-                # Step 5: Implement the main program
-                def main():
-
-                # Step 5: Prompt the user to enter the number of subjects
-                num_subjects = int(input("Enter the number of subjects: "))
-
-                # Step 6: Create an empty array to hold the grades
-                grades = []
-
-                # Step 7: Prompt the user to enter the grades for each subject and add them to the array
-                for i in range(num_subjects):
-                    while True:
-                        try:
-                            grade = int(input("Enter the grade for subject {}: ".format(i+1)))
-                            break
-                        except ValueError:
-                            print("Invalid input. Please enter a valid grade.")
-
-                    grades.append(grade)
-
-                # Step 8: Call the calculate_average_grade function with the grades as input
-                average_grade = calculate_average_grade(grades)
-
-                # Step 9: Call the provide_feedback function with the average grade as input
-                provide_feedback(average_grade)
-
-                # Step 10: Test the program
-                main()
-                '''
+                full_solution =  self.get_body_argument("full_solution")
+                
                 model_prompt = '''
                 You have been given the role of a educator providing feedback to students. You have been given the model solution that has a complete implementation of this exercise. This solution contains comments (e.g. "Step 1: Define the average_grade_calculator function") that preceed the code required to satisfy that step. 
                 Use this model solution as a guideline to help you provide feedback on the student code.

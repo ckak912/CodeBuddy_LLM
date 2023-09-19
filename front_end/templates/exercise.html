@@ -216,7 +216,7 @@
 
         
             
-            <button onclick="checkStepFunctionality()" class="button is-medium is-primary is-outlined is-pulled-right mt-0 mr-1 margin-bottom my-2 has-tooltip-top has-tooltip-multiline" id="review_button" data-tooltip="Click this button to review your current implementation and get feedback">Code Reviewer</button>
+            <button onclick="updateModal()" class="button is-medium is-primary is-outlined is-pulled-right mt-0 mr-1 margin-bottom my-2 has-tooltip-top has-tooltip-multiline" id="review_button" data-tooltip="Click this button to review your current implementation and get feedback">Code Reviewer</button>
 
             <div class="modal" id="code_review_modal">
                 <div class="modal-background" id="modal_background"></div>
@@ -318,28 +318,65 @@
 
                 let stepComplete = [];
 
+                let full_solution = ``;
+
                 var count = 1;
 
+                let stepsUrl = '';
 
+                let solutionUrl = '';
 
+                async function getSteps() {
+                    var current_exercise =  {{exercise_basics['id']}};
 
-                // Function to generate dropdown items dynamically
-                async function generateDropdownItems(tool_feature) {
-                     try {
+                    if (current_exercise === 1) {
+                        stepsUrl = '/static/step_process_avggrade.json';
+                        solutionUrl = '/static/full_solution_avggrade.txt';
+                    }
+                    else if (current_exercise === 2) {
+                        stepsUrl = '/static/step_process_palindrome.json';
+                        solutionUrl = '/static/full_solution_palindrome.txt';
+                    }
+                    else if (current_exercise === 3) {
+                        stepsUrl = '/static/step_process_interest.json';
+                        solutionUrl = '/static/full_solution_interest.txt';
+                    }
+                    try {
                         // Make an HTTP request to the exercise endpoint
-                        const response = await fetch('/static/step_process.json');
-     
+                        const response = await fetch(solutionUrl);
+    
+                        // Check the response status
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch exercise data');
+                        }
+                        // Parse the response data
+                        full_solution = await response.text();
+                        
+                    } catch (error) {
+                        console.error('Error:', error.message);
+                    }
+                    try {
+                        // Make an HTTP request to the exercise endpoint
+                        const response = await fetch(stepsUrl);
+    
                         // Check the response status
                         if (!response.ok) {
                             throw new Error('Failed to fetch exercise data');
                         }
                         // Parse the response data
                         steps = await response.json();
-     
                         
                     } catch (error) {
                         console.error('Error:', error.message);
-                    }                   
+                    }              
+                }
+
+                getSteps();
+
+
+                // Function to generate dropdown items dynamically
+                function generateDropdownItems(tool_feature) {
+            
                     // Generate modal body content
                     var modalBody = document.getElementById("step_feedback_body");
                     modalBody.innerHTML = ""; // Clear existing content
@@ -460,26 +497,26 @@
                         hrHint.style.width = "100%";
                         dropdownContent.appendChild(hrHint);
 
-                        generate_help(steps)
+                        generate_help()
 
                     }
 
                         
                 }
                 
-                // function to get user code from editor
-                function get_user_code() {
-                    user_code = editor.getSelectedText().trim();
+                // // function to get user code from editor
+                // function get_user_code() {
+                //     user_code = editor.getSelectedText().trim();
 
-                    if (user_code == "")
-                        user_code = editor.getValue().trim();
+                //     if (user_code == "")
+                //         user_code = editor.getValue().trim();
 
-                    return user_code;
-                }
+                //     return user_code;
+                // }
 
 
                     
-                async function generate_help(stepProcessGen) {
+                async function generate_help() {
                     // TODO: integrate this parallel call to the pseudo and hint code endpoint 
                     var pseudoCodeUrl = `/exercise_pseudo_code/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}/{{ exercise_basics['id'] }}`;
                     var hintCodeUrl = `/exercise_hint_code/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}/{{ exercise_basics['id'] }}`;
@@ -495,7 +532,7 @@
                         // Fetch the step process asynchronously
                         const step_process = JSON.stringify(steps);
                         // Create an object with the data to send in the AJAX request
-                        const postData = {"user_code": user_code, "step_process": step_process};
+                        const postData = {"user_code": user_code, "full_solution": full_solution};
                         var hintBtn = document.getElementById("hint_button_id");
 
                         $.ajax({
@@ -612,7 +649,7 @@
                     // Fetch the step process asynchronously
                     const step_process = JSON.stringify(steps);
                     // Create an object with the data to send in the AJAX request
-                    const postData = {"user_code": user_code, "step_process": step_process};
+                    const postData = {"user_code": user_code, "step_process": step_process, "full_solution": full_solution};
                     
                     // Make the AJAX request
                     $.ajax({
