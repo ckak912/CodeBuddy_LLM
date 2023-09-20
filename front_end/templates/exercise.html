@@ -163,9 +163,18 @@
             <p class="is-primary has-tooltip-multiline has-tooltip-right" data-tooltip="After you have entered your response, click on 'Submit'." />
 
             <div class="llm_bar">        
-                <a class="button is-medium is-primary" id="help" onclick="generateDropdownItems(1)">Help Me</a>
+                <a class="button is-medium is-primary has-tooltip-multiline has-tooltip-right" id="help" data-tooltip="Clicking me updates the dropdown menu (right) with an explanation to help you if you're stuck!" onclick="generateDropdownItems(1)">Help Me</a>
 
-                <div id="steps_dropdown" class="top-space dropdown is-outlined is-pulled-right margin-bottom my-5 mt-5" style="width: fit-content;  " onclick="toggleDropdown('steps_dropdown')">
+                <div class="modal" id="loading-indicator">
+                    <div class="modal-background" id="modal_background_load"></div>
+                    <!-- Spinner animation -->
+                    <div class="modal-content" id="loading_content">
+                        <div class="spinner"></div>
+                        <!-- Loading text -->
+                        <p>LLM Tutor Thinking...</p>
+                    </div>
+                </div>
+                <div id="steps_dropdown" class="top-space dropdown is-outlined is-pulled-right margin-bottom my-5 mt-5 has-tooltip-multiline has-tooltip-left" data-tooltip="Here is the dynamic dropdown menu that is colour-coded based on the buttons on the left." style="width: fit-content;  " onclick="toggleDropdown('steps_dropdown')">
                     <div class="dropdown-trigger">
                         <button id="tool_button" class="button is-primary has-text-white" aria-haspopup="true" style="padding: 0 100px;">
                             <span>AI Tool</span>
@@ -181,9 +190,9 @@
                     </div>
                 </div>
 
-                <a class="button is-medium is-dark" id="steps" onclick="generateDropdownItems(0)">Steps</a>
+                <a class="button is-medium is-dark has-tooltip-multiline has-tooltip-right" id="steps" data-tooltip="Clicking me updates the dropdown (right) with the logical step process for completing this exercise!" onclick="generateDropdownItems(0)">Steps</a>
             </div>
-            
+
 
             <p class="top-space" id="user_code_area">
                 <textarea class="textarea is-fullwidth monospace" rows="15" id="user_code">{% if exercise_details["starter_code"] and len(submissions) == 0 %}{{ exercise_details["starter_code"] }}{% end %}</textarea>
@@ -213,10 +222,9 @@
             <!-- <div class="smaller-font is-pulled-right mt-0 mr-1" style="padding-left: 10px"><em>{{ exercise_basics["title"] }}</em></div> -->
 
 
-
         
             
-            <button onclick="updateModal()" class="button is-medium is-primary is-outlined is-pulled-right mt-0 mr-1 margin-bottom my-2 has-tooltip-top has-tooltip-multiline" id="review_button" data-tooltip="Click this button to review your current implementation and get feedback">Code Reviewer</button>
+            <button class="button is-medium is-primary is-outlined is-pulled-right mt-0 mr-1 margin-bottom my-2 has-tooltip-top has-tooltip-multiline" id="review_button" data-tooltip="Click this button to review your current implementation and get feedback">Code Reviewer</button>
 
             <div class="modal" id="code_review_modal">
                 <div class="modal-background" id="modal_background"></div>
@@ -225,12 +233,26 @@
                         <p class="modal-card-title" id="step_feedback_title">Here is some helpful feedback:</p>
                     </header>
                     <section class="modal-card-body" id="step_feedback_body"></section>
-                    <footer class="modal-card-foot">
+                    <footer class="modal-card-foot" id="modal-card-footer">
                         <button class="button" onclick="closeModal()">Back</button>
                         <button class="button" onclick="updateModal()">Update Feedback</button>
                     </footer>
                 </div>
             </div>
+
+            <!-- Modal for displaying hint response -->
+            <div class="modal" id="hint-modal">
+                <div class="modal-background"></div>
+                <div class="modal-content" id="hint-modal-content">
+                    <p id="response-content">LLM Tutor Thinking...</p>
+                </div>
+                <div class="modal-card-foot" id="hint-modal-foot">
+                    <button class="button" id="regenerate-hint-btn">Re-generate Hint</button>
+                    <button class="button" id="append-code-btn">Append code to editor</button>
+                </div>
+            </div>
+
+
 
             <!-- Feedback modal
             <div class="modal" id="feedback_modal">
@@ -253,19 +275,20 @@
             <style>
             /* CSS styling for the modals */
 
-            .modal {
+            #code_review_modal {
                 display: none;
-                position: absolute;
-                z-index: 9999;
-                top: 0;
-                left: 0;
-                bottom: 0;
+                position: fixed;
+                z-index: 9998;
+                top: 50%; /* Center vertically */
+                left: 50%; /* Center horizontally */
+                transform: translate(-50%, -50%);
                 width: 100%;
-                height: auto;
+                height: 100%;
                 background-color: rgba(0, 0, 0, 0.01);
+                overflow:hidden;
             }
 
-            .modal-content {
+            #modal-card-body {
                 position: relative;
                 top: 50%;
                 left: 50%;
@@ -275,9 +298,10 @@
                 border-radius: 10px;
                 max-width: 600px;
                 max-height: 80vh;
+                overflow-y: auto;
             }
 
-            .modal-card-foot {
+            #modal-card-footer {
                 position: relative;
                 margin-bottom: 25%;
                 display: flex;
@@ -310,9 +334,104 @@
             }
             </style>
 
+
+            <style>
+                /* CSS for the spinner animation */
+                .spinner {
+                    border: 4px solid rgba(255, 255, 255, 0.3);
+                    border-radius: 50%;
+                    border-top: 4px solid #3498db; /* Change the color to your preference */
+                    width: 40px;
+                    height: 40px;
+                    animation: spin 1s linear infinite; /* Spinner animation */
+                    margin: 0 auto;
+                }
+
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+
+                /* CSS for the loading modal */
+                #loading-indicator {
+                    display: none;
+                    position: fixed;
+                    z-index: 9999;
+                    top: 50%; /* Center vertically */
+                    left: 50%; /* Center horizontally */
+                    transform: translate(-50%, -50%);
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                /* Additional styles for the loading modal content */
+                #loading-content {
+                    background-color: white;
+                    padding: 20px;
+                    border-radius: 10px;
+                    max-width: 300px; /* Adjust the width as needed */
+                }
+
+                /* CSS for the loading modal text alignment */
+                #loading-indicator #loading_content p {
+                    text-align: center;
+                }
+
+
+            </style>
+
+            <style>
+
+                /* CSS for the hint modal */
+                #hint-modal {
+                    display: none;
+                    position: fixed;
+                    z-index: 9998;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 100%; /* Adjust the width as needed */
+                    height: 100%; /* Maximum width */
+                    background-color: rgba(0, 0, 0, 0.5);
+                    overflow: auto;
+                    border-radius: 10px;
+                }
+
+                #hint-modal-content {
+                    background-color: white;
+                    padding: 20px;
+                    margin-bottom: 60px; /* Height of the footer */
+                }
+
+                #hint-modal-foot {
+                    display: flex;
+                    justify-content: center; /* Center buttons horizontally */
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    padding: 10px;
+                    background-color: #f5f5f5; /* Background color for the footer */
+                    border-radius: 0 0 10px 10px; /* Rounded corners for the footer */
+                }
+
+                /* Style the buttons in the footer */
+                #hint-modal-foot .button {
+                    margin: 0 10px; /* Add some spacing between buttons */
+                }
+
+
+            </style>
+
             <script>
                 // Get the dropdown element
                 const dropdown = document.getElementById('steps_dropdown');
+
+                // Display the loading indicator when the AJAX request starts
+                $('#loading-indicator').hide();
 
                 let steps = {};
 
@@ -368,10 +487,15 @@
                         
                     } catch (error) {
                         console.error('Error:', error.message);
-                    }              
+                    }  
+                    
+                    Object.entries(steps).forEach(function ([stepNumber, stepContent]) { 
+                        stepComplete.push(false);
+                    });
                 }
 
                 getSteps();
+                generateDropdownItems(0);
 
 
                 // Function to generate dropdown items dynamically
@@ -387,7 +511,7 @@
                     modalBody.appendChild(paragraph);
 
                     var content = document.createElement("p");
-                    content.textContent = steps[stepNumber];
+                    content.textContent = "-------------------------------";
                     content.id = "step" + stepNumber + "_content"; // Assign a unique ID for each step's content
                     modalBody.appendChild(content);
 
@@ -416,9 +540,7 @@
 
                         dropdownContent.innerHTML = "";
 
-                        Object.entries(steps).forEach(function ([stepNumber, stepContent]) {
-
-                        stepComplete.push(false);  
+                        Object.entries(steps).forEach(function ([stepNumber, stepContent]) {  
                         var div = document.createElement("div");
                         div.className = "dropdown-item";
                         div.style.flex = "1";
@@ -428,6 +550,9 @@
                         if (stepComplete[stepNumber - 1] === true) {
                             p.style.textDecoration = "line-through";
 
+                        }
+                        else {
+                            p.style.textDecoration = "none";
                         }
                         p.textContent = stepNumber + ". " + stepContent;
 
@@ -461,7 +586,7 @@
 
                         var whatsNextP = document.createElement("p");
                         whatsNextP.style.textAlign = "justify";
-                        whatsNextP.textContent = "HELLO MY BRO WHAT THE IS GOING ON GOOD THANKS YEAH THATS GOOD";
+                        whatsNextP.textContent = "The generated pseudo code will go here";
                         whatsNextP.id = "id_whatsnext"
 
                         whatsNextDiv.appendChild(whatsNextP);
@@ -514,23 +639,51 @@
                 //     return user_code;
                 // }
 
+                // Open the hint modal and populate its content
+                function openHintModal(responseContent) {
+                    var modal = document.getElementById('hint-modal');
+                    var contentElement = document.getElementById('response-content');
+                    var regenerateHintBtn = document.getElementById('regenerate-hint-btn');
+                    var appendCodeBtn = document.getElementById('append-code-btn');
+
+                    // Set the content of the modal
+                    contentElement.textContent = responseContent;
+
+                    // Add event listener to the "Re-generate Hint" button
+                    regenerateHintBtn.addEventListener('click', function () {
+                        responseContent = ""
+                        handleHintButtonClick();
+                        modal.style.display = 'none';
+                    });
+
+                    // Add event listener to the "Append code to editor" button
+                    appendCodeBtn.addEventListener('click', function () {
+                        editor.setValue(editor.getValue() + '\n' + responseContent);
+                        modal.style.display = 'none';
+                    });
+
+                    // Show the modal
+                    modal.style.display = 'block';
+                }
+
 
                     
                 async function generate_help() {
                     // TODO: integrate this parallel call to the pseudo and hint code endpoint 
                     var pseudoCodeUrl = `/exercise_pseudo_code/{{ exercise_basics['id'] }}/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}`;
-                    var hintCodeUrl = `/exercise_hint_code/{{ exercise_basics['id'] }}/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}`;
 
-                    var userCode = get_user_code();
-                    if (user_code == "") {
-                        // Handle the case where the user code is empty
-                        // might need an error message here
-                        return;
-                    }
+                    // Display the loading indicator when the AJAX request starts
+                    $('#loading-indicator').show();
                     try {
                         
                         // Fetch the step process asynchronously
                         const step_process = JSON.stringify(steps);
+                        var userCode = get_user_code();
+                        if (user_code == "") {
+                            // Handle the case where the user code is empty
+                            // might need an error message here
+                            return;
+                        }
                         // Create an object with the data to send in the AJAX request
                         const postData = {"user_code": user_code, "full_solution": full_solution};
                         var hintBtn = document.getElementById("hint_button_id");
@@ -548,31 +701,15 @@
                         })
                         .fail(function(error) {
                                 console.error("AJAX error:", error);
-                            })
-                        
-                        hintBtn.onclick = function () {
-                            $.when(
-                                $.ajax({
-                                    type: 'POST', // Changed request type to POST
-                                    url: hintCodeUrl,
-                                    data: postData,
-                                    async: true,
-                                })
-                            )
-                            .done(function(hintCodeResponse) {
-                                try {
-                                    var jsonHintCode = JSON.parse(hintCodeResponse);
-                                    
-                                    editor.setValue(editor.getValue() + '\n' + jsonHintCode);
+                        })
+                        .always(function() {
+                            // Hide the loading indicator when the request is complete, whether it succeeds or fails
+                            $('#loading-indicator').hide();
+                        })
 
-                                } catch (e) {
-                                    console.error("Error parsing JSON response:", e)
-                                }
-                            })
-                            .fail(function(error) {
-                                console.error("AJAX error:", error);
-                            })
-                        };
+                        // Attach the function to the hintBtn.onclick event
+                        hintBtn.onclick = handleHintButtonClick;
+
                     } catch (error) {
                     console.error("Error:", error);
                     // Handle the error here if needed
@@ -583,6 +720,53 @@
                 document.addEventListener("DOMContentLoaded", function () {
                     generateDropdownItems(0);
                 });
+
+
+                async function handleHintButtonClick() {
+
+                    $('#loading-indicator').show();
+                    var hintCodeUrl = `/exercise_hint_code/{{ exercise_basics['id'] }}/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}`;
+
+                    var userCode = get_user_code();
+                    if (user_code == "") {
+                        // Handle the case where the user code is empty
+                        // might need an error message here
+                        return;
+                    }
+                    // Create an object with the data to send in the AJAX request
+                    const postData = {"user_code": user_code, "full_solution": full_solution};
+
+                    try {
+                        $.when(
+                                $.ajax({
+                                    type: 'POST', // Changed request type to POST
+                                    url: hintCodeUrl,
+                                    data: postData,
+                                    async: true,
+                                })
+                            )
+                            .done(function(hintCodeResponse) {
+                                try {
+
+                                    openHintModal(JSON.parse(hintCodeResponse));
+
+                                } catch (e) {
+                                    console.error("Error parsing JSON response:", e)
+                                }
+                            })
+                            .fail(function(error) {
+                                console.error("AJAX error:", error);
+                            })
+                            .always(function() {
+                                $('#loading-indicator').hide();
+                            })
+
+                    } catch (error) {
+                    console.error("Error:", error);
+                    // Handle the error here if needed
+                    }
+
+                }
 
             // Function to open the modal
             function openModal() {
@@ -637,6 +821,7 @@
 
             // Function to update feedback
             async function updateModal() {
+                $('#loading-indicator').show();
                 var url = `/exercise_feedback/{{ exercise_basics['id'] }}/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}`;
                 //get the user code
                 var user_code = get_user_code();
@@ -670,6 +855,12 @@
                                 var currentID = "step" + stepNumber + "_content";
                                 var currentFeedback = document.getElementById(currentID);
                                 currentFeedback.textContent = feedbackContent;
+                                if (feedbackContent.includes("You have completed")) {
+                                    stepComplete[stepNumber - 1] = true;
+
+                                } else {
+                                    stepComplete[stepNumber - 1] = false;
+                                }
                             });
 
                         } catch (error) {
@@ -679,6 +870,9 @@
                     .fail(function(error) {
                         console.error("AJAX error:", error);
                         // Handle the error message here if needed
+                    })
+                    .always(function () {
+                        $('#loading-indicator').hide();
                     });
                 } catch (error) {
                     console.error("Error:", error);
