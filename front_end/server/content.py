@@ -629,7 +629,6 @@ class Content:
 
     # This function contains the SQL logic for storing pseudo code generated from the model
     def store_pseudo_code(self, exercise_id, course_id, assignment_id, pseudo_code):
-      
       try:
         sql = '''INSERT OR REPLACE INTO LLM_STUFF (LLM_exercise_id, LLM_course_id, LLM_assignment_id, pseudo_code)
                   VALUES (?, ?, ?, ?)
@@ -645,7 +644,24 @@ class Content:
 
       return None
 
-    
+    def store_user_code(self, exercise_id, course_id, assignment_id, user_code):
+      print("hello this is the store_user_code")
+      print(f"this is the user code being stored: {user_code}")
+      try:
+        sql = '''INSERT OR REPLACE INTO LLM_user_code (exercise_id, course_id, assignment_id, code, date_created)
+                  VALUES (?, ?, ?, ?, ?)
+                '''
+
+        result = self.execute(sql, (exercise_id, course_id, assignment_id, user_code, datetime.utcnow()) )
+
+        if result:
+            return result
+
+      except Exception as inst:
+        print("Error in store_user_code:", inst)
+
+      return None
+
     def retrieve_pseudo_code(self, exercise_id, course_id, assignment_id):
       try:
         # SQL query to retrieve pseudo code from LLM_stuff table

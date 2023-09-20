@@ -53,6 +53,8 @@ class HintCodeHandler(BaseUserHandler):
             self.content.store_hint_code(exercise_id, course_id, assignment_id, hint_code)
 
             hint_code_json = self.write(json.dumps(hint_code))
+
+            self.content.store_user_code(exercise_id, course_id, assignment_id, user_code)
                 
         except Exception as inst:
             print("hint code handler exception:", inst)

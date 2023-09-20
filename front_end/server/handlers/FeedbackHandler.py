@@ -61,6 +61,7 @@ class FeedbackHandler(BaseUserHandler):
             
             self.content.store_llm_feedback(exercise_id, course_id, assignment_id, feedback)
 
+            self.content.store_user_code(exercise_id, course_id, assignment_id, user_code)
 
         except Exception as inst:
             print("feedback handler exception:", inst)
