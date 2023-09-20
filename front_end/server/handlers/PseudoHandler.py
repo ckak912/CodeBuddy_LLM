@@ -44,9 +44,10 @@ class PseudoHandler(BaseUserHandler):
 
             pseudo_code = result['choices'][0]['message']['content']
 
+            self.content.store_pseudo_code(exercise_id, course_id, assignment_id, pseudo_code)
+
             pseudo_code_json = self.write(json.dumps(pseudo_code))
 
-            self.content.store_pseudo_code(exercise_id, course_id, assignment_id, pseudo_code_json)
 
         except Exception as inst:
             print("Pseudo Handler Exception:", inst)

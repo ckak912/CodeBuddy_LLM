@@ -58,10 +58,11 @@ class FeedbackHandler(BaseUserHandler):
             feedback = result['choices'][0]['message']['content']
 
             feedback_json = self.write(json.dumps(feedback))
+            
+            self.content.store_llm_feedback(exercise_id, course_id, assignment_id, feedback)
 
-            self.content.store_llm_feedback(exercise_id, course_id, assignment_id, feedback_json)
 
         except Exception as inst:
-            print("Exception:", inst)
+            print("feedback handler exception:", inst)
             self.set_status(500)
             self.finish({"error": "Failed to fetch exercise feedback."})

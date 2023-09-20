@@ -49,12 +49,13 @@ class HintCodeHandler(BaseUserHandler):
 
             hint_code = result['choices'][0]['message']['content']
 
-            hint_code_json = self.write(json.dumps(hint_code))
             
-            self.content.store_hint_code(exercise_id, course_id, assignment_id, hint_code_json)
+            self.content.store_hint_code(exercise_id, course_id, assignment_id, hint_code)
+
+            hint_code_json = self.write(json.dumps(hint_code))
                 
         except Exception as inst:
-            print("hint code handler error:", inst)
+            print("hint code handler exception:", inst)
 
             self.set_status(500)
             self.finish({"error": "Failed to fetch hint code."})

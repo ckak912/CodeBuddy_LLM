@@ -604,7 +604,7 @@ class Content:
 
     # This function contains the SQL logic for storing steps after you have retrieved them from OpenAI
     def store_llm_feedback(self, exercise_id, course_id, assignment_id, exercise_feedback_json_str):
-      
+      print(f"feedback beings stored: {exercise_feedback_json_str}")
       sql = '''INSERT OR REPLACE INTO LLM_STUFF (LLM_exercise_id, LLM_course_id, LLM_assignment_id, exercise_feedback)
                 VALUES (?, ?, ?, ?)
               '''
