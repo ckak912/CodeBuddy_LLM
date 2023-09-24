@@ -191,8 +191,17 @@
                         </div>
                     </div>
                 </div>
-
+                <style>
+                    #review_button {
+                        position: absolute;
+                        bottom: 355px;
+                        right: 200px;
+                        left: 50%;
+                    }
+                </style>
                 <a class="steps button is-medium is-dark has-tooltip-multiline has-tooltip-right" id="steps" data-tooltip="Clicking me updates the dropdown (right) with the logical step process for completing this exercise!" onclick="generateDropdownItems(0)">Steps</a>
+                <a class="codereviewer button is-medium is-primary is-outlined is-pulled-right mt-0 mr-1 margin-bottom my-2 has-tooltip-top has-tooltip-multiline" id="review_button" data-tooltip="Click this button to review your current implementation and get feedback">Code Reviewer</a>
+
             </div>
 
             <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/intro.min.js"></script>
@@ -216,8 +225,8 @@
                     },
                     {
                         element: document.querySelector('.codereviewer'),
-                        intro: 'This is a dropdown menu that will change based on what you want from the model\n e.g. an explanation for your current implementation, or a step by step process!'
-                    },
+                        intro: 'This button will generate some feedback from the model, and reviews your current implementation against the full solution'
+                    }
                 ]
                 }).start();
             </script>
@@ -249,7 +258,10 @@
 
             <!-- <div class="smaller-font is-pulled-right mt-0 mr-1" style="padding-left: 10px"><em>{{ exercise_basics["title"] }}</em></div> -->
 
-            <button class="codereviewer button is-medium is-primary is-outlined is-pulled-right mt-0 mr-1 margin-bottom my-2 has-tooltip-top has-tooltip-multiline" id="review_button" data-tooltip="Click this button to review your current implementation and get feedback">Code Reviewer</button>
+            <!-- <div class="XXX code_reviewer">
+                <a class="XXX button is-medium is-primary is-outlined is-pulled-right mt-0 mr-1 margin-bottom my-2 has-tooltip-top has-tooltip-multiline" id="review_button" data-tooltip="Click this button to review your current implementation and get feedback">Code Reviewer</a>
+            </div> -->
+            <!-- <button class="codereviewer button is-medium is-primary is-outlined is-pulled-right mt-0 mr-1 margin-bottom my-2 has-tooltip-top has-tooltip-multiline" id="review_button" data-tooltip="Click this button to review your current implementation and get feedback">Code Reviewer</button> -->
 
             <div class="modal" id="code_review_modal">
                 <div class="modal-background" id="modal_background"></div>
@@ -971,9 +983,8 @@
 
             <div class="buttons">
                 <a class="button is-medium is-dark" id='submit_button'>Submit</a>
-
                 {% if exercise_details["back_end"] != "not_code" and not exercise_details["allow_any_response"] %}
-                    <a class="button is-medium is-primary is-outlined" onclick='run_code(true)' id='run_button'>Run</a>
+                    <a class="run button is-medium is-primary is-outlined" onclick='run_code(true)' id='run_button'>Run</a>
                 {% end %}
 
                 {% if exercise_details["allow_any_response"] or exercise_details["back_end"] == "not_code" %}
@@ -981,6 +992,7 @@
                 {% else %}
                     <p class="is-primary has-tooltip-multiline has-tooltip-right" data-tooltip="When you are ready to test your solution against the expected output, click on 'Submit'. If you would like to see the output of your solution without officially submitting it, click on 'Run'. If you highlight a section of code and hit the Tab button, it will indent all lines of code in the block. If you hit Shift-Tab, it will reduce the indentation. There is also an option for commenting sections of code. To do this, highlight the code you wish to comment; then enter Command + / (Mac) or Control + / (Windows) to comment the code. If it is already commented, this will uncomment the code." />
                 {% end %}
+
 
                 <span class="icon mt-0">
                     <i class="far fa-question-circle fa-1x"></i>
