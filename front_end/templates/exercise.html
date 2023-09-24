@@ -2,6 +2,8 @@
     {% if assignment_basics["exists"] %}
         {% if exercise_basics["exists"] %}
             <link rel="stylesheet" href="/static/css/modal.css">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/introjs.min.css">
+
 
             {% if assignment_details["has_timer"] and not is_administrator and not is_instructor and not is_assistant %}
                 <link rel="stylesheet" href="/static/css/timer.css">
@@ -163,7 +165,7 @@
             <p class="is-primary has-tooltip-multiline has-tooltip-right" data-tooltip="After you have entered your response, click on 'Submit'." />
 
             <div class="llm_bar">        
-                <a class="button is-medium is-primary has-tooltip-multiline has-tooltip-right" id="help" data-tooltip="Clicking me updates the dropdown menu (right) with an explanation to help you if you're stuck!" onclick="generateDropdownItems(1)">Help Me</a>
+                <a class="helpme button is-medium is-primary has-tooltip-multiline has-tooltip-top" id="help" data-tooltip="Clicking me updates the dropdown menu (right) with an explanation to help you if you're stuck!" onclick="generateDropdownItems(1)">Help Me</a>
 
                 <div class="modal" id="loading-indicator">
                     <div class="modal-background" id="modal_background_load"></div>
@@ -177,7 +179,7 @@
                 <div id="steps_dropdown" class="top-space dropdown is-outlined is-pulled-right margin-bottom my-5 mt-5 has-tooltip-multiline has-tooltip-left" data-tooltip="Here is the dynamic dropdown menu that is colour-coded based on the buttons on the left." style="width: fit-content;  " onclick="toggleDropdown('steps_dropdown')">
                     <div class="dropdown-trigger">
                         <button id="tool_button" class="button is-primary has-text-white" aria-haspopup="true" style="padding: 0 100px;">
-                            <span>AI Tool</span>
+                            <span class="aitool">AI Tool</span>
                             <span class="icon-is-small">
                                 <i class="fas fa-angle-down" aria-hidden="true" style="margin-left: 10px"></i>
                             </span>
@@ -189,10 +191,45 @@
                         </div>
                     </div>
                 </div>
+                <style>
+                    /* #review_button {
+                        position: absolute;
+                        bottom: 355px;
+                        right: 200px;
+                        left: 90%;
+                    } */
+                </style>
+                <a class="steps button is-medium is-dark has-tooltip-multiline has-tooltip-top" id="steps" data-tooltip="Clicking me updates the dropdown (right) with the logical step process for completing this exercise!" onclick="generateDropdownItems(0)">Steps</a>
+                <a class="codereviewer button is-medium is-primary is-outlined has-tooltip-multiline has-tooltip-top" id="review_button" data-tooltip="Click this button to review your current implementation and get feedback">Code Reviewer</a>
 
-                <a class="button is-medium is-dark has-tooltip-multiline has-tooltip-right" id="steps" data-tooltip="Clicking me updates the dropdown (right) with the logical step process for completing this exercise!" onclick="generateDropdownItems(0)">Steps</a>
             </div>
 
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/intro.min.js"></script>
+            <script>
+                introJs().setOptions({
+                    steps:[{
+                        title: 'Welcome to CodeBuddy!',
+                        intro: 'This is a quick onboarding experience to show you around 😊'
+                    },
+                    {
+                        element: document.querySelector('.helpme'),
+                        intro: 'This button will update the AI Tool (right) with an explanation from the model to help if you are stuck!'
+                    },
+                    {
+                        element: document.querySelector('.steps'),
+                        intro: 'This button will update the AI Tool to display the step by step process to complete this exercise'
+                    },
+                    {
+                        element: document.querySelector('.codereviewer'),
+                        intro: 'This button will generate some feedback from the model, and reviews your current implementation against the full solution'
+                    },
+                    {
+                        element: document.querySelector('.aitool'),
+                        intro: 'This is a dropdown menu that will change based on what you want from the model\n e.g. an explanation for your current implementation, or a step by step process!'
+                    }
+                ]
+                }).start();
+            </script>
 
             <p class="top-space" id="user_code_area">
                 <textarea class="textarea is-fullwidth monospace" rows="15" id="user_code">{% if exercise_details["starter_code"] and len(submissions) == 0 %}{{ exercise_details["starter_code"] }}{% end %}</textarea>
@@ -221,10 +258,10 @@
 
             <!-- <div class="smaller-font is-pulled-right mt-0 mr-1" style="padding-left: 10px"><em>{{ exercise_basics["title"] }}</em></div> -->
 
-
-        
-            
-            <button class="button is-medium is-primary is-outlined is-pulled-right mt-0 mr-1 margin-bottom my-2 has-tooltip-top has-tooltip-multiline" id="review_button" data-tooltip="Click this button to review your current implementation and get feedback">Code Reviewer</button>
+            <!-- <div class="XXX code_reviewer">
+                <a class="XXX button is-medium is-primary is-outlined is-pulled-right mt-0 mr-1 margin-bottom my-2 has-tooltip-top has-tooltip-multiline" id="review_button" data-tooltip="Click this button to review your current implementation and get feedback">Code Reviewer</a>
+            </div> -->
+            <!-- <button class="codereviewer button is-medium is-primary is-outlined is-pulled-right mt-0 mr-1 margin-bottom my-2 has-tooltip-top has-tooltip-multiline" id="review_button" data-tooltip="Click this button to review your current implementation and get feedback">Code Reviewer</button> -->
 
             <div class="modal" id="code_review_modal">
                 <div class="modal-background" id="modal_background"></div>
@@ -251,8 +288,6 @@
                     <button class="button" id="append-code-btn">Append code to editor</button>
                 </div>
             </div>
-
-
 
             <!-- Feedback modal
             <div class="modal" id="feedback_modal">
@@ -948,7 +983,6 @@
 
             <div class="buttons">
                 <a class="button is-medium is-dark" id='submit_button'>Submit</a>
-
                 {% if exercise_details["back_end"] != "not_code" and not exercise_details["allow_any_response"] %}
                     <a class="button is-medium is-primary is-outlined" onclick='run_code(true)' id='run_button'>Run</a>
                 {% end %}
