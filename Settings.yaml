@@ -11,12 +11,12 @@ m_port: 9798
 # Indicate the number of parallel processes that should be used for the front-end server.
 f_num_processes: 1
 # Indicate the number of parallel processes that should be used for the middle-layer server.
-m_num_processes: 2
+m_num_processes: 1
 # Indicate the amount of memory that the front-end server should be allowed to use.
 f_memory_gb: 4
 # Indicate whether the front-end server should run in the background (yes) and thus continue running when you log out of the server. Otherwise, put no.
-f_run_in_background: no
+f_run_in_background: yes
 # Indicate whether the middle-layer server should run in the background (yes) and thus continue running when you log out of the server. Otherwise, put no.
-m_run_in_background: no
+m_run_in_background: yes
 # Indicate a password to be used in development mode. When running the server locally, it's easiest to use a blank password. However, if you deploy a development server for others to test, it is a good idea to require a password when users log in to the server.
 dev_password: ""
