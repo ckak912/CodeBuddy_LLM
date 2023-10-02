@@ -468,55 +468,14 @@
 
                 let solutionUrl = '';
 
-                async function getSteps() {
-                    var current_exercise =  {{exercise_basics['id']}};
+                const html = `{{ exercise_details["instructions"] }}`;
 
-                    if (current_exercise === 1) {
-                        stepsUrl = '/static/step_process_avggrade.json';
-                        descriptionUrl = '/static/avggrade_desc.txt';
-                    }
-                    else if (current_exercise === 2) {
-                        stepsUrl = '/static/step_process_palindrome.json';
-                        descriptionUrl = '/static/palin_desc.txt';
-                    }
-                    else if (current_exercise === 3) {
-                        stepsUrl = '/static/step_process_interest.json';
-                        descriptionUrl = '/static/interest_desc.txt';
-                    }
-                    try {
-                        // Make an HTTP request to the exercise endpoint
-                        const response = await fetch(descriptionUrl);
-    
-                        // Check the response status
-                        if (!response.ok) {
-                            throw new Error('Failed to fetch exercise data');
-                        }
-                        // Parse the response data
-                        description = await response.text();
-                        
-                    } catch (error) {
-                        console.error('Error:', error.message);
-                    }
-                    try {
-                        // Make an HTTP request to the exercise endpoint
-                        const response = await fetch(stepsUrl);
-    
-                        // Check the response status
-                        if (!response.ok) {
-                            throw new Error('Failed to fetch exercise data');
-                        }
-                        // Parse the response data
-                        steps = await response.json();
-                        
-                    } catch (error) {
-                        console.error('Error:', error.message);
-                    }  
-                    
-                    Object.entries(steps).forEach(function ([stepNumber, stepContent]) { 
-                        stepComplete.push(false);
-                    });
-                }
+                const parser = new DOMParser();
 
+                const doc = parser.parseFromString(html, 'text/html');
+
+                const task_desc = doc.body.textContent;
+                
                 // Generate modal body content
                 var modalBody = document.getElementById("step_feedback_body");
                 modalBody.innerHTML = ""; // Clear existing content
@@ -530,12 +489,7 @@
                 content.id = "feedbackBody"; // Assign a unique ID
                 modalBody.appendChild(content);
 
-                getSteps();
-            
-
-
-
-                    var dropdownContent = document.getElementById("dropdown-content");
+                var dropdownContent = document.getElementById("dropdown-content");
 
                     // if (tool_feature === 0) {
 
@@ -683,7 +637,7 @@
                             return;
                         }
                         // Create an object with the data to send in the AJAX request
-                        const postData = {"user_code": user_code, "task_desc": description};
+                        const postData = {"user_code": user_code, "task_desc": task_desc};
                         var hintBtn = document.getElementById("hint_button_id");
 
                         $.ajax({
@@ -714,12 +668,6 @@
                     }
                 }
 
-                // Wait for the DOM to be fully loaded
-                document.addEventListener("DOMContentLoaded", function () {
-                    generateDropdownItems(0);
-                });
-
-
                 async function handleHintButtonClick() {
 
                     $('#loading-indicator').show();
@@ -732,7 +680,7 @@
                         return;
                     }
                     // Create an object with the data to send in the AJAX request
-                    const postData = {"user_code": user_code, "task_desc": description};
+                    const postData = {"user_code": user_code, "task_desc": task_desc};
 
                     try {
                         $.when(
@@ -770,7 +718,6 @@
             function openModal() {
                 var modal = document.getElementById('code_review_modal');
                 modal.style.display = 'block';
-                stepComplete[0] = true;
                 document.getElementById('modal_background').addEventListener('click', closeModal);
             }
 
@@ -780,8 +727,6 @@
                 modal.style.display = 'none';
                 document.getElementById('modal_background').removeEventListener('click', closeModal);
             }
-
-
 
             // async function get_static_step_process() {
             //     try {
@@ -832,7 +777,7 @@
                     // Fetch the step process asynchronously
                     const step_process = JSON.stringify(steps);
                     // Create an object with the data to send in the AJAX request
-                    const postData = {"user_code": user_code, "task_desc": description};
+                    const postData = {"user_code": user_code, "task_desc": task_desc};
                     
                     // Make the AJAX request
                     $.ajax({
