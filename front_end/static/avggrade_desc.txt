@@ -1,0 +1,23 @@
+Task Description: You are tasked with creating a C program that calculates the average grade of a student based on their individual subject grades and provides feedback based on the average grade obtained. The program does not require user input and defines the input data within the program itself.
+Requirements:
+Implement a function called calculateaveragegrade that takes an array of subject grades as input.
+
+The grades are represented as integers ranging from 0 to 100.
+The function should calculate and return the average grade.
+Implement a function called provide_feedback that takes the average grade as input.
+
+Based on the average grade, the function should provide feedback according to the following criteria:
+- If the average grade is below 70, return "Needs improvement."
+- If the average grade is between 70 and 80 (both inclusive), return "Average performance."
+- If the average grade is between 80 and 90 (both inclusive), return "Good job!"
+- If the average grade is 90 or above, return "Excellent performance!"
+
+Implement a main program that:
+
+Calls the calculateaveragegrade function with the test grades as input and stores the result.
+Calls the provide_feedback function with the average grade as input and prints the feedback.
+
+Instructions:
+Your task is to implement the required functions (calculateaveragegrade and provide_feedback) and integrate them into the provided main program to achieve the above functionality. The program should not rely on user input and should work with the provided test data.
+
+Feel free to enhance the program with additional features or modifications as you see fit. Ensure that the program handles the provided test data gracefully and provides appropriate feedback messages.

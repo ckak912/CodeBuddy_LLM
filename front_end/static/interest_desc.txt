@@ -1,0 +1,15 @@
+Task Description:
+In this task, you'll create a C program that calculates simple interest for a loan or investment. Simple interest is a fundamental concept in finance and a great exercise for beginner programmers.
+
+Task Requirements:
+Input Principal Amount: Implement a function called get_principal_amount that takes no arguments. Inside this function, set a predefined principal amount, e.g., $1000, and return this value.
+
+Input Interest Rate: Implement a function called get_interest_rate that takes no arguments. Inside this function, set a predefined annual interest rate as a decimal (e.g., 0.05 for 5%), and return this value.
+
+Input Time (in years): Implement a function called get_time_period that takes no arguments. Inside this function, set a predefined time period in years, e.g., 2 years, and return this value.
+
+Calculate Simple Interest: Create a function called calculate_simple_interest that calculates and returns the simple interest based on the principal amount, interest rate, and time period. Use the formula: Simple Interest = Principal Amount * Annual Interest Rate * Time Period.
+
+Display Result: In the main part of your program, call the above functions to input data and calculate the simple interest. Then, display the calculated simple interest.
+
+This task allows you to practice defining functions, performing calculations, and displaying results—all essential skills for a budding programmer. Plus, it's a practical concept you can apply in real-life financial situations. Happy coding!
