@@ -1,0 +1,26 @@
+# Step 1: Define a list of pre-defined strings to investigate for palindromes.
+strings = ["Madam", "racecar", "A man, a plan, a canal: Panama", "Python", "level"]
+
+# Step 2: Create a loop to iterate through each string in the list.
+for string in strings:
+    # Step 3: Inside the loop, remove spaces and punctuation marks from the current string.
+    cleaned_string = ""
+    for char in string:
+        if char.isalnum():
+            cleaned_string += char
+
+    # Step 4: Convert the cleaned string to lowercase to ensure case-insensitivity.
+    cleaned_string = cleaned_string.lower()
+
+    # Step 5: Check if the cleaned lowercase string reads the same forward and backward.
+    reversed_string = cleaned_string[::-1]
+    if cleaned_string == reversed_string:
+        # Step 6: If the string is a palindrome, print 'The word/phrase is a palindrome!'
+        print(f"The word/phrase '{string}' is a palindrome!")
+    else:
+        # Step 7: If the string is not a palindrome, print 'The word/phrase is not a palindrome.'
+        print(f"The word/phrase '{string}' is not a palindrome.")
+
+    # Step 8: Continue the loop to investigate the next pre-defined string.
+
+# Step 9: After investigating all strings, end the program.

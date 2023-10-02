@@ -1,0 +1,38 @@
+# Step 1: Define a function called get_principal_amount. This function doesn't take any arguments.
+def get_principal_amount():
+    # Step 2: Inside the get_principal_amount function, set a predefined principal amount, for example, $1000.
+    principal_amount = 1000
+    return principal_amount
+
+# Step 3: Define another function called get_interest_rate. Like the previous one, this function doesn't take any arguments.
+def get_interest_rate():
+    # Step 4: Inside the get_interest_rate function, set a predefined annual interest rate as a decimal. For example, 0.05 for 5%.
+    interest_rate = 0.05
+    return interest_rate
+
+# Step 5: Create a function called get_time_period, which also takes no arguments.
+def get_time_period():
+    # Step 6: Inside the get_time_period function, set a predefined time period in years, e.g., 2 years.
+    time_period = 2
+    return time_period
+
+# Step 7: Now, implement the main function called calculate_simple_interest. 
+# This function should take the principal amount, interest rate, and time period as arguments 
+# and calculate the simple interest using the formula: Simple Interest = Principal Amount * Annual Interest Rate * Time Period.
+def calculate_simple_interest(principal_amount, interest_rate, time_period):
+    simple_interest = principal_amount * interest_rate * time_period
+    return simple_interest
+
+# Step 8: In the main part of your program, call the get_principal_amount, get_interest_rate, and get_time_period functions to input data and store the results.
+principal_amount = get_principal_amount()
+interest_rate = get_interest_rate()
+time_period = get_time_period()
+
+# Step 9: Next, call the calculate_simple_interest function with the obtained data as arguments to calculate the simple interest.
+simple_interest = calculate_simple_interest(principal_amount, interest_rate, time_period)
+
+# Step 10: Finally, display the calculated simple interest along with the other input values.
+print("Principal Amount:", principal_amount)
+print("Interest Rate:", interest_rate)
+print("Time Period:", time_period)
+print("Simple Interest:", simple_interest)

@@ -1,0 +1,12 @@
+{
+"1": "Define a list of pre-defined strings to investigate for palindromes.",
+"2": "Create a loop to iterate through each string in the list.",
+"3": "Inside the loop, remove spaces and punctuation marks from the current string. You can use Python's string methods or regular expressions for this.",
+"4": "Convert the cleaned string to lowercase to ensure case-insensitivity.",
+"5": "Check if the cleaned lowercase string reads the same forward and backward. You can use string slicing to reverse the string.",
+"6": "If the string is a palindrome, print 'The word/phrase is a palindrome!'",
+"7": "If the string is not a palindrome, print 'The word/phrase is not a palindrome.'",
+"8": "Continue the loop to investigate the next pre-defined string.",
+"9": "After investigating all strings, end the program.",
+"10": "Test your code with various pre-defined strings to verify its accuracy."
+}  

@@ -1,0 +1,9 @@
+verify that the responses from the model (pseudo, hint, feedback) are being stored in the database
+
+record click data using new handler and content methods
+ - do migrations
+
+add timestamp for each feature so that we can connect the user code with the responses from the model
+
+deploy codebuddy to netlify
+

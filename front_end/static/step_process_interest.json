@@ -1,0 +1,12 @@
+{
+"1": "Start by defining a function called get_principal_amount. This function doesn't take any arguments.",
+"2": "Inside the get_principal_amount function, set a predefined principal amount, for example, $1000.",
+"3": "Define another function called get_interest_rate. Like the previous one, this function doesn't take any arguments.",
+"4": "Inside the get_interest_rate function, set a predefined annual interest rate as a decimal. For example, 0.05 for 5%.",
+"5": "Create a function called get_time_period, which also takes no arguments.",
+"6": "Inside the get_time_period function, set a predefined time period in years, e.g., 2 years.",
+"7": "Now, implement the main function called calculate_simple_interest. This function should take the principal amount, interest rate, and time period as arguments and calculate the simple interest using the formula: Simple Interest = Principal Amount * Annual Interest Rate * Time Period.",
+"8": "In the main part of your program, call the get_principal_amount, get_interest_rate, and get_time_period functions to input data and store the results.",
+"9": "Next, call the calculate_simple_interest function with the obtained data as arguments to calculate the simple interest.",
+"10": "Finally, display the calculated simple interest along with the other input values."
+}

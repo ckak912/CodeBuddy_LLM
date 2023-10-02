@@ -15,6 +15,5 @@ backup
 .vscode/
 node_modules/
 .DS_Store
-static/
 front_end/server/html/
 tmp

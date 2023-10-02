@@ -1,0 +1,16 @@
+{
+  "": {
+    "css": [
+      "static/css/styles.css",
+      "static/css/profile-styles.css",
+      "static/css/modal.css",
+      "static/css/timer.css"
+    ],
+    "js": [
+      "static/exercise.js"
+    ]
+  },
+  "metadata": {
+    "timestamp": "2023-08-08T21:46:00.585Z"
+  }
+}

@@ -1,0 +1,39 @@
+# Step 1: Define an array called 'subject_grades' that holds subject grades as integers.
+subject_grades = [80, 75, 90, 85, 95]
+
+# Step 2: Create a function called 'calculate_average_grade' that takes 'subject_grades' as input.
+def calculate_average_grade(subject_grades):
+    # Step 3: Inside the 'calculate_average_grade' function, calculate the sum of grades in 'subject_grades'.
+    grade_sum = sum(subject_grades)
+    
+    # Step 4: Divide the sum by the number of grades to calculate the average grade.
+    average_grade = grade_sum / len(subject_grades)
+    
+    # Step 5: Return the average grade.
+    return average_grade
+
+# Step 6: Create a function called 'provide_feedback' that takes the average grade as input.
+def provide_feedback(average_grade):
+    # Step 7: Inside the 'provide_feedback' function, use conditional statements to provide feedback based on the average grade.
+    if average_grade >= 90:
+        feedback = "Excellent performance!"
+    elif average_grade >= 80:
+        feedback = "Good job!"
+    elif average_grade >= 70:
+        feedback = "Average performance."
+    else:
+        feedback = "Needs improvement."
+    
+    # Step 8: Return the appropriate feedback message.
+    return feedback
+
+# Step 10: Call the 'calculate_average_grade' function with 'subject_grades' as input and store the result in a variable.
+average_grade = calculate_average_grade(subject_grades)
+
+# Step 11: Call the 'provide_feedback' function with the average grade as input and store the feedback message in a variable.
+feedback_message = provide_feedback(average_grade)
+
+# Step 12: Print the feedback message to display the student's performance feedback.
+print(feedback_message)
+
+# Step 13: Test the program with different sets of test grades to ensure it calculates the average grade and provides accurate feedback.
