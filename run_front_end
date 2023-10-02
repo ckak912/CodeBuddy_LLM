@@ -73,3 +73,5 @@ else
     ${args} \
     ${image_name} /bin/bash
 fi
+
+echo "script finished"
