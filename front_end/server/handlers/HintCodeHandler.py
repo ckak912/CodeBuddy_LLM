@@ -22,14 +22,17 @@ class HintCodeHandler(BaseUserHandler):
             # # get the pseudo code from the database
             # pseudo_code = self.content.retrieve_pseudo_code(exercise_id, course_id, assignment_id)
 
+            task_desc = self.get_body_argument("task_desc")
+            
             model_prompt = '''
-            You have been given the role of a lecturer that provides help to students on their programming tasks. This help is in the form
-            of generating the next line of code for a student when they are stuck on a given step. Use the user code to understand what step 
-            the student is currently stuck on. Then use the Instructor Solution provided as a rubric to generate the next line of code to help the student
-            complete that step. Ensure that you only use the instructor solution code to compare functionality (the code comments are only used for structuring the code). It is important here to ONLY generate the next line, not the entire step.
+            You have been given the role of a educator who helps students by generating the next line of code upon the students request. You have been given the task description above which gives you context for the programming task that the student is trying to complete.
+            Based on the task description requirements above, and the student code provided below, generate the next line of code for the programming task. The structure of the response should be:
+
+                    # Based on the student code, the next line should be...
+
+            NOTE: as this response is student-facing, it is of utmost importance that you only provide the next line of code. Do not, under any circumstances provide multiple lines of code.
             '''
 
-            full_solution =  self.get_body_argument("full_solution")
             
             headers = {
                 'Content-Type': 'application/json',
@@ -39,7 +42,7 @@ class HintCodeHandler(BaseUserHandler):
             data = {
                 'model': 'gpt-3.5-turbo',
                 'messages': [
-                    {'role': 'user', 'content': model_prompt + '\n\nStudent Code:\n' + user_code + '\n\nInstructor Solution:\n' + full_solution}
+                    {'role': 'user', 'content': task_desc + '\n\n' + model_prompt + '\n\nStudent Code:\n' + user_code}
                     ],
                 'temperature': 0.7,
             }
@@ -52,8 +55,10 @@ class HintCodeHandler(BaseUserHandler):
             
             self.content.store_hint_code(exercise_id, course_id, assignment_id, hint_code)
 
-            hint_code_json = self.write(json.dumps(hint_code))
+            
 
+            hint_code_json = self.write(json.dumps(hint_code))
+            hint_code = ""
             self.content.store_user_code(exercise_id, course_id, assignment_id, user_code)
                 
         except Exception as inst:

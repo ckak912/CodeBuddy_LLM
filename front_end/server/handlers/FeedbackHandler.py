@@ -14,30 +14,23 @@ class FeedbackHandler(BaseUserHandler):
 
             API_URL = 'https://api.openai.com/v1/chat/completions'
 
-            full_solution =  self.get_body_argument("full_solution").replace("\r","")
+            task_desc = self.get_body_argument("task_desc")
             
             model_prompt = '''
-            You have been given the role of a educator providing feedback to students. You have been given the model solution that has a complete implementation of this exercise. This solution contains comments (e.g. "Step 1: Define the average_grade_calculator function") that preceed the code required to satisfy that step. 
-            Use this model solution as a guideline to help you provide feedback on the student code.
+            You have been given the role of a educator providing feedback to students. You have been given the task description which gives you context for the programming task that the student is trying to complete.
+            Based on this task description provide some comprehensive feedback to the student code provided below. The structure of the feedback should be:
+                
+            
+                The current state of the user code is...
 
-            Structure your response in the format like below:
+                Feedback: Based on the requirements of the task description the student code...
 
-            "n: 'feedbackContent'",
-            ...
-            for each step 'n'
-
-            - If the student code has equivalent functionality to the corresponding code within the model solution , for feedback simply write "You have completed step n".
-                    
-            - If the student code doesn't have equivalent functionality to the corresponding code within the model solution, explain what is missing using purely natural language, NO CODE.
-
-            - Ensure that you provide feedback for the current state of the student code against the comments in the rubric, even if there isn't relevant code to compare.
+            NOTE: It is important that you just provide feedback in the structure outlined above. Don't tell students how to complete the task.
             '''
 
             # get the user's current code implementation
             user_code = self.get_body_argument("user_code").replace("\r", "")
 
-            # get the static step process file
-            step_process = self.get_body_argument("step_process")
 
             headers = {
                 'Content-Type': 'application/json',
@@ -47,7 +40,7 @@ class FeedbackHandler(BaseUserHandler):
             data = {
                 'model': 'gpt-3.5-turbo',
                 'messages': [
-                    {'role': 'user', 'content': 'Step Process:\n' + step_process + 'Model Solution (the rubric):\n' + full_solution + '\n\n' + model_prompt + '\n\n' + 'Student Code (this is what you provide feedback for):\n' + user_code}
+                    {'role': 'user', 'content': task_desc + '\n\n' + model_prompt + '\n\n' + 'Student Code (this is what you provide feedback for):\n' + user_code}
                 ],
                 'temperature': 0.8
             }

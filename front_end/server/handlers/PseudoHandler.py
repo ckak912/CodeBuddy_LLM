@@ -12,13 +12,18 @@ class PseudoHandler(BaseUserHandler):
 
             API_URL = 'https://api.openai.com/v1/chat/completions'
 
-            full_solution = self.get_body_argument("full_solution").replace("\r","")
 
-
+            task_desc = self.get_body_argument("task_desc")
+            
             model_prompt = '''
-            You have been given the role of a lecture that help their students by providing pseudo code for the current step they're stuck on: a natural language explanation of the logical process required to complete the current step.
-            The user code has been provided below which you will use to discover what the current step is. The Instructor Solution is also provided which will give you an idea of what needs to change within the user code in order to complete
-            the current step the student is stuck on. Ensure that you only use the instructor solution code to compare functionality (the code comments are only used for structuring the code). Provide a response in the structure of a concise natural language explanation (that is summed up in one paragraph) of what is required to progress to the next logical step.'''
+            You have been given the role of a educator who helps students when stuck on a given programming task. You have been given the task description above which gives you context for the programming task that the student is trying to complete.
+            Based on the task description requirements, in one concise sentence, provide a helpful statement that the students can use to progress the implementation of the task. The student code is provided below. Examples of advice are listed below:
+
+                    - In order to start the task, you should....
+                    - There is a syntax error in the code, you should change it to...
+
+            NOTE: The response should be in purely natural language NEVER generate code
+            '''
             
             # get the user's current code implementation
             user_code = self.get_body_argument("user_code").replace("\r", "")
@@ -34,7 +39,7 @@ class PseudoHandler(BaseUserHandler):
             data = {
                 'model': 'gpt-3.5-turbo',
                 'messages': [
-                    {'role': 'user', 'content': model_prompt + '\nUser Code:\n' + user_code + '\n' + 'Instructor Solution: \n' + full_solution}
+                    {'role': 'user', 'content': task_desc + '\n\n' + model_prompt + '\n\nStudent Code:\n' + user_code}
                 ],
                 'temperature': 0.8,
             }

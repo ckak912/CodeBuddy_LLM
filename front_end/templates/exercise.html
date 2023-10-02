@@ -165,7 +165,7 @@
             <p class="is-primary has-tooltip-multiline has-tooltip-right" data-tooltip="After you have entered your response, click on 'Submit'." />
 
             <div class="llm_bar">        
-                <a class="helpme button is-medium is-primary has-tooltip-multiline has-tooltip-top" id="help" data-tooltip="Clicking me updates the dropdown menu (right) with an explanation to help you if you're stuck!" onclick="generateDropdownItems(1)">Help Me</a>
+                <a class="helpme button is-medium is-primary has-tooltip-multiline has-tooltip-top" id="help" data-tooltip="Clicking me updates the dropdown menu (right) with an explanation to help you if you're stuck!" onclick="generate_help()">Help Me</a>
 
                 <div class="modal" id="loading-indicator">
                     <div class="modal-background" id="modal_background_load"></div>
@@ -176,9 +176,9 @@
                         <p>LLM Tutor Thinking...</p>
                     </div>
                 </div>
-                <div id="steps_dropdown" class="top-space dropdown is-outlined is-pulled-right margin-bottom my-5 mt-5 has-tooltip-multiline has-tooltip-left" data-tooltip="Here is the dynamic dropdown menu that is colour-coded based on the buttons on the left." style="width: fit-content;  " onclick="toggleDropdown('steps_dropdown')">
+                <div id="steps_dropdown" class="dropdown is-outlined is-pulled-right has-tooltip-multiline has-tooltip-left" data-tooltip="Here is the dynamic dropdown menu containing helpful tips and a button to generate a hint." style="width: fit-content;  " onclick="toggleDropdown('steps_dropdown')">
                     <div class="dropdown-trigger">
-                        <button id="tool_button" class="button is-primary has-text-white" aria-haspopup="true" style="padding: 0 100px;">
+                        <button id="tool_button" class="button is-primary has-text-white is-medium" aria-haspopup="true" style="padding: 0 100px;">
                             <span class="aitool">AI Tool</span>
                             <span class="icon-is-small">
                                 <i class="fas fa-angle-down" aria-hidden="true" style="margin-left: 10px"></i>
@@ -191,15 +191,7 @@
                         </div>
                     </div>
                 </div>
-                <style>
-                    /* #review_button {
-                        position: absolute;
-                        bottom: 355px;
-                        right: 200px;
-                        left: 90%;
-                    } */
-                </style>
-                <a class="steps button is-medium is-dark has-tooltip-multiline has-tooltip-top" id="steps" data-tooltip="Clicking me updates the dropdown (right) with the logical step process for completing this exercise!" onclick="generateDropdownItems(0)">Steps</a>
+
                 <a class="codereviewer button is-medium is-primary is-outlined has-tooltip-multiline has-tooltip-top" id="review_button" data-tooltip="Click this button to review your current implementation and get feedback">Code Reviewer</a>
 
             </div>
@@ -212,20 +204,16 @@
                         intro: 'This is a quick onboarding experience to show you around 😊'
                     },
                     {
-                        element: document.querySelector('.steps'),
-                        intro: 'Start here! Click this button to view the step-by-step process to complete the exercise. After the feedback indicates you\'ve completed a task, click it again to see which steps you\'ve finished.'
-                    },
-                    {
                         element: document.querySelector('.helpme'),
-                        intro: 'This button will update the AI tool with an explanation from the model that compares your code in the editor against the instructor\'s full solution. If you need a hint, this button is your go-to!'
+                        intro: 'This button will update the AI tool (right) with a helpful explanation based on the code you have in the editor below. If you need a hint, this button is your go-to!'
                     },               
                     {
                         element: document.querySelector('.codereviewer'),
-                        intro: 'Click this button when you feel like you have achieved the functionality for your current step, and the model will give you some feedback!'
+                        intro: 'Click this button to receive some comprehensive feedback regarding the code you have entered below.'
                     },
                     {
                         element: document.querySelector('.aitool'),
-                        intro: 'This is a versatile dropdown menu that adapts to your needs. You can request an explanation for your current implementation, or a step-by-step process. It\'s your AI toolkit!'
+                        intro: 'This dropdown menu will contain the explanation if you click the "Help Me" button. You may also click the "Generate Hint" button within this menu to generate the next line of code.'
                     }
                 ]
                 }).start();
@@ -284,7 +272,7 @@
                     <p id="response-content">LLM Tutor Thinking...</p>
                 </div>
                 <div class="modal-card-foot" id="hint-modal-foot">
-                    <button class="button" id="regenerate-hint-btn">Re-generate Hint</button>
+                    <button class="button" id="back-hint-btn">Back</button>
                     <button class="button" id="append-code-btn">Append code to editor</button>
                 </div>
             </div>
@@ -485,26 +473,26 @@
 
                     if (current_exercise === 1) {
                         stepsUrl = '/static/step_process_avggrade.json';
-                        solutionUrl = '/static/full_solution_avggrade.txt';
+                        descriptionUrl = '/static/avggrade_desc.txt';
                     }
                     else if (current_exercise === 2) {
                         stepsUrl = '/static/step_process_palindrome.json';
-                        solutionUrl = '/static/full_solution_palindrome.txt';
+                        descriptionUrl = '/static/palin_desc.txt';
                     }
                     else if (current_exercise === 3) {
                         stepsUrl = '/static/step_process_interest.json';
-                        solutionUrl = '/static/full_solution_interest.txt';
+                        descriptionUrl = '/static/interest_desc.txt';
                     }
                     try {
                         // Make an HTTP request to the exercise endpoint
-                        const response = await fetch(solutionUrl);
+                        const response = await fetch(descriptionUrl);
     
                         // Check the response status
                         if (!response.ok) {
                             throw new Error('Failed to fetch exercise data');
                         }
                         // Parse the response data
-                        full_solution = await response.text();
+                        description = await response.text();
                         
                     } catch (error) {
                         console.error('Error:', error.message);
@@ -529,140 +517,113 @@
                     });
                 }
 
+                // Generate modal body content
+                var modalBody = document.getElementById("step_feedback_body");
+                modalBody.innerHTML = ""; // Clear existing content
+
+                var paragraph = document.createElement("strong");
+                paragraph.textContent = "Feedback:";
+                modalBody.appendChild(paragraph);
+
+                var content = document.createElement("p");
+                content.textContent = "Please click update feedback";
+                content.id = "feedbackBody"; // Assign a unique ID
+                modalBody.appendChild(content);
+
                 getSteps();
-                generateDropdownItems(0);
-
-
-                // Function to generate dropdown items dynamically
-                function generateDropdownItems(tool_feature) {
             
-                    // Generate modal body content
-                    var modalBody = document.getElementById("step_feedback_body");
-                    modalBody.innerHTML = ""; // Clear existing content
 
-                    Object.keys(steps).forEach(function (stepNumber) {
-                    var paragraph = document.createElement("strong");
-                    paragraph.textContent = "Step " + stepNumber + " Feedback:";
-                    modalBody.appendChild(paragraph);
-
-                    var content = document.createElement("p");
-                    content.textContent = "-------------------------------";
-                    content.id = "step" + stepNumber + "_content"; // Assign a unique ID for each step's content
-                    modalBody.appendChild(content);
-
-
-                    const hrFeedback = document.createElement("hr");
-                    hrFeedback.className = "dropdown-divider";
-                    hrFeedback.style.flexBasis = "100%";
-                    hrFeedback.style.width = "100%";
-                    modalBody.appendChild(hrFeedback);
-
-                    });
 
 
                     var dropdownContent = document.getElementById("dropdown-content");
 
-                    if (tool_feature === 0) {
+                    // if (tool_feature === 0) {
 
-                        // Update the color of the dropdown menu and the button
-                        var buttonElement = document.getElementById('tool_button');
+                    //     // Update the color of the dropdown menu and the button
+                    //     var buttonElement = document.getElementById('tool_button');
                         
-                        if (buttonElement.classList.contains('is-primary')) {
-                            buttonElement.classList.remove('is-primary');
-                        }
-                        buttonElement.classList.add('is-dark');
+                    //     if (buttonElement.classList.contains('is-primary')) {
+                    //         buttonElement.classList.remove('is-primary');
+                    //     }
+                    //     buttonElement.classList.add('is-dark');
 
 
-                        dropdownContent.innerHTML = "";
+                    //     dropdownContent.innerHTML = "";
 
-                        Object.entries(steps).forEach(function ([stepNumber, stepContent]) {  
-                        var div = document.createElement("div");
-                        div.className = "dropdown-item";
-                        div.style.flex = "1";
+                    //     Object.entries(steps).forEach(function ([stepNumber, stepContent]) {  
+                    //     var div = document.createElement("div");
+                    //     div.className = "dropdown-item";
+                    //     div.style.flex = "1";
 
-                        var p = document.createElement("p");
-                        p.style.textAlign = "justify";
-                        if (stepComplete[stepNumber - 1] === true) {
-                            p.style.textDecoration = "line-through";
+                    //     var p = document.createElement("p");
+                    //     p.style.textAlign = "justify";
+                    //     if (stepComplete[stepNumber - 1] === true) {
+                    //         p.style.textDecoration = "line-through";
 
-                        }
-                        else {
-                            p.style.textDecoration = "none";
-                        }
-                        p.textContent = stepNumber + ". " + stepContent;
+                    //     }
+                    //     else {
+                    //         p.style.textDecoration = "none";
+                    //     }
+                    //     p.textContent = stepNumber + ". " + stepContent;
 
-                        div.appendChild(p);
-                        dropdownContent.appendChild(div);
+                    //     div.appendChild(p);
+                    //     dropdownContent.appendChild(div);
 
-                        const hrSteps = document.createElement("hr");
-                        hrSteps.className = "dropdown-divider";
-                        hrSteps.style.flexBasis = "100%";
-                        hrSteps.style.width = "100%";
-                        dropdownContent.appendChild(hrSteps);
-                        });
+                    //     const hrSteps = document.createElement("hr");
+                    //     hrSteps.className = "dropdown-divider";
+                    //     hrSteps.style.flexBasis = "100%";
+                    //     hrSteps.style.width = "100%";
+                    //     dropdownContent.appendChild(hrSteps);
+                    //     });
                         
-                    } else if (tool_feature === 1) {
+                    // } else 
 
-                        // Update the color of the dropdown menu and the button
-                        var buttonElement = document.getElementById('tool_button');
-                        
-                        if (buttonElement.classList.contains('is-dark')) {
-                            buttonElement.classList.remove('is-dark');
-                        }
-                        buttonElement.classList.add('is-primary');
-
-                        // Clear existing options
-                        dropdownContent.innerHTML = "";
-
-                        // Create 'What's Next' feature
-                        var whatsNextDiv  = document.createElement("div");
-                        whatsNextDiv.className = "dropdown-item";
-                        whatsNextDiv.style.flex = "1";
-
-                        var whatsNextP = document.createElement("p");
-                        whatsNextP.style.textAlign = "justify";
-                        whatsNextP.textContent = "The generated pseudo code will go here";
-                        whatsNextP.id = "id_whatsnext"
-
-                        whatsNextDiv.appendChild(whatsNextP);
-                        dropdownContent.appendChild(whatsNextDiv);
-
-                        const hrNext = document.createElement("hr");
-                        hrNext.className = "dropdown-divider";
-                        hrNext.style.flexBasis = "100%";
-                        hrNext.style.width = "100%";
-
-                        dropdownContent.appendChild(hrNext);
-
-                        // Create the hint button
-                        const hintButton = document.createElement("hint-button");
-                        hintButton.className = "button is-primary is-small";
-                        hintButton.style.width = "100%";
-                        hintButton.style.textAlign = "center";
-                        hintButton.id = "hint_button_id";
-                        hintButton.textContent = "Generate Hint (ONCE PER STEP)";
-
-                        const hintElement = document.createElement("div");
-                        hintElement.className = "dropdown-item";
-                        hintElement.style.flex = "1";
-
-                        hintElement.appendChild(hintButton);
-                        dropdownContent.appendChild(hintElement);
-
-
-
-                        const hrHint = document.createElement("hr");
-                        hrHint.className = "dropdown-divider";
-                        hrHint.style.flexBasis = "100%";
-                        hrHint.style.width = "100%";
-                        dropdownContent.appendChild(hrHint);
-
-                        generate_help()
-
-                    }
-
-                        
+                // Update the color of the dropdown menu and the button
+                var buttonElement = document.getElementById('tool_button');
+                
+                if (buttonElement.classList.contains('is-dark')) {
+                    buttonElement.classList.remove('is-dark');
                 }
+                buttonElement.classList.add('is-primary');
+
+                // Clear existing options
+                dropdownContent.innerHTML = "";
+
+                // Create 'What's Next' feature
+                var whatsNextDiv  = document.createElement("div");
+                whatsNextDiv.className = "dropdown-item";
+                whatsNextDiv.style.flex = "1";
+
+                var whatsNextP = document.createElement("p");
+                whatsNextP.style.textAlign = "justify";
+                whatsNextP.textContent = "The generated explanation will go here";
+                whatsNextP.id = "id_whatsnext"
+
+                whatsNextDiv.appendChild(whatsNextP);
+                dropdownContent.appendChild(whatsNextDiv);
+
+                const hrNext = document.createElement("hr");
+                hrNext.className = "dropdown-divider";
+                hrNext.style.flexBasis = "100%";
+                hrNext.style.width = "100%";
+
+                dropdownContent.appendChild(hrNext);
+
+                // Create the hint button
+                const hintButton = document.createElement("hint-button");
+                hintButton.className = "button is-primary is-small";
+                hintButton.style.width = "100%";
+                hintButton.style.textAlign = "center";
+                hintButton.id = "hint_button_id";
+                hintButton.textContent = "Generate Hint";
+
+                const hintElement = document.createElement("div");
+                hintElement.className = "dropdown-item";
+                hintElement.style.flex = "1";
+
+                hintElement.appendChild(hintButton);
+                dropdownContent.appendChild(hintElement);
+
                 
                 // // function to get user code from editor
                 // function get_user_code() {
@@ -678,22 +639,24 @@
                 function openHintModal(responseContent) {
                     var modal = document.getElementById('hint-modal');
                     var contentElement = document.getElementById('response-content');
-                    var regenerateHintBtn = document.getElementById('regenerate-hint-btn');
+                    var backHintBtn = document.getElementById('back-hint-btn');
                     var appendCodeBtn = document.getElementById('append-code-btn');
 
                     // Set the content of the modal
                     contentElement.textContent = responseContent;
 
                     // Add event listener to the "Re-generate Hint" button
-                    regenerateHintBtn.addEventListener('click', function () {
-                        responseContent = ""
-                        handleHintButtonClick();
+                    backHintBtn.addEventListener('click', function () {
+                        responseContent = "";
+                        hintCodeResponse = "";
                         modal.style.display = 'none';
                     });
 
                     // Add event listener to the "Append code to editor" button
                     appendCodeBtn.addEventListener('click', function () {
                         editor.setValue(editor.getValue() + '\n' + responseContent);
+                        responseContent = "";
+                        hintCodeResponse = "";
                         modal.style.display = 'none';
                     });
 
@@ -720,7 +683,7 @@
                             return;
                         }
                         // Create an object with the data to send in the AJAX request
-                        const postData = {"user_code": user_code, "full_solution": full_solution};
+                        const postData = {"user_code": user_code, "task_desc": description};
                         var hintBtn = document.getElementById("hint_button_id");
 
                         $.ajax({
@@ -769,7 +732,7 @@
                         return;
                     }
                     // Create an object with the data to send in the AJAX request
-                    const postData = {"user_code": user_code, "full_solution": full_solution};
+                    const postData = {"user_code": user_code, "task_desc": description};
 
                     try {
                         $.when(
@@ -840,19 +803,19 @@
             //     return steps;
             // }
 
-            function extractFeedback(text) {
-                var regex = /(\d+):([\s\S]*?)(?=\d+:|$)/g;
-                var feedback = {};
-                var match;
+            // function extractFeedback(text) {
+            //     var regex = /(\d+):([\s\S]*?)(?=\d+:|$)/g;
+            //     var feedback = {};
+            //     var match;
 
-                while ((match = regex.exec(text)) !== null) {
-                    var stepNumber = match[1];
-                    var feedbackContent = match[2].trim(); // Trim to remove extra spaces
-                    feedback[stepNumber] = feedbackContent;
-                }
+            //     while ((match = regex.exec(text)) !== null) {
+            //         var stepNumber = match[1];
+            //         var feedbackContent = match[2].trim(); // Trim to remove extra spaces
+            //         feedback[stepNumber] = feedbackContent;
+            //     }
 
-                return feedback;
-            }            
+            //     return feedback;
+            // }            
 
             // Function to update feedback
             async function updateModal() {
@@ -869,7 +832,7 @@
                     // Fetch the step process asynchronously
                     const step_process = JSON.stringify(steps);
                     // Create an object with the data to send in the AJAX request
-                    const postData = {"user_code": user_code, "step_process": step_process, "full_solution": full_solution};
+                    const postData = {"user_code": user_code, "task_desc": description};
                     
                     // Make the AJAX request
                     $.ajax({
@@ -881,22 +844,13 @@
                         try {
                             var feedbackText = JSON.parse(response);
 
-                            var feedback = extractFeedback(feedbackText);
+                            // var feedback = extractFeedback(feedbackText);
 
                             // Now, the feedback object contains step numbers as keys and feedback content as values
-                            console.log(feedback);
+                            // console.log(feedback);
 
-                            Object.entries(feedback).forEach(function ([stepNumber, feedbackContent]) {
-                                var currentID = "step" + stepNumber + "_content";
-                                var currentFeedback = document.getElementById(currentID);
-                                currentFeedback.textContent = feedbackContent;
-                                if (feedbackContent.includes("You have completed")) {
-                                    stepComplete[stepNumber - 1] = true;
-
-                                } else {
-                                    stepComplete[stepNumber - 1] = false;
-                                }
-                            });
+                            feedbackContent = document.getElementById("feedbackBody");
+                            feedbackContent.textContent = feedbackText;
 
                         } catch (error) {
                             console.error("JSON Parsing error:", error);
