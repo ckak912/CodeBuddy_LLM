@@ -43,3 +43,5 @@ then
 else
   ${start_command}
 fi
+
+echo "script finished"
