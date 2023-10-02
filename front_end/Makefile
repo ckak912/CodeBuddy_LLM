@@ -1,7 +1,7 @@
 .PHONY: dev-server
 dev-server: make-dirs
 	DEBUG=true \
-	python3 server/webserver.py
+	python server/webserver.py
 
 make-dirs:
 	mkdir -p database logs
