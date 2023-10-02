@@ -165,9 +165,9 @@ if __name__ == "__main__":
             print(f"Checking database status for version {v+1}...")
 
             if os.path.isfile(f"migration_scripts/{migration}.py"):
-                command = f"python3 migration_scripts/{migration}.py"
+                command = f"python migration_scripts/{migration}.py"
             else:
-                command = f"python3 migration_scripts/migrate.py {migration}"
+                command = f"python migration_scripts/migrate.py {migration}"
 
             result = run_command(command)
 
