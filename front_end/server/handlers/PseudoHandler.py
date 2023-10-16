@@ -51,7 +51,8 @@ class PseudoHandler(BaseUserHandler):
 
             self.content.store_pseudo_code(exercise_id, course_id, assignment_id, pseudo_code)
 
-            pseudo_code_json = self.write(json.dumps(pseudo_code))
+            # Write the response back to the front_end
+            self.write(json.dumps(pseudo_code))
 
             self.content.store_user_code(exercise_id, course_id, assignment_id, user_code)
 

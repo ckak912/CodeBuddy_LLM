@@ -50,7 +50,8 @@ class FeedbackHandler(BaseUserHandler):
 
             feedback = result['choices'][0]['message']['content']
 
-            feedback_json = self.write(json.dumps(feedback))
+            # Write the response back to the front_end
+            self.write(json.dumps(feedback))
             
             self.content.store_llm_feedback(exercise_id, course_id, assignment_id, feedback)
 

@@ -56,8 +56,8 @@ class HintCodeHandler(BaseUserHandler):
             self.content.store_hint_code(exercise_id, course_id, assignment_id, hint_code)
 
             
-
-            hint_code_json = self.write(json.dumps(hint_code))
+            # Write the response back to the front_end
+            self.write(json.dumps(hint_code))
             hint_code = ""
             self.content.store_user_code(exercise_id, course_id, assignment_id, user_code)
                 

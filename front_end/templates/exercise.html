@@ -277,23 +277,6 @@
                 </div>
             </div>
 
-            <!-- Feedback modal
-            <div class="modal" id="feedback_modal">
-                <div class="modal-background" id="feedback_modal_background"></div>
-                <div class="modal-content">
-                    <header class="modal-card-head">
-                        <p class="modal-card-title" id="step_feedback_title"></p>
-                        <button class="modal-close" onclick="closeFeedbackModal()"></button>
-                    </header>
-                    <section class="modal-card-body" id="step_feedback_body">
-                        Feedback content will be dynamically added here -->
-                    <!-- </section>
-                    <footer class="modal-card-foot">
-                        <button class="button is-success" onclick="viewHint()">View hint</button>
-                        <button class="button" onclick="goBack()">Back</button>
-                    </footer>
-                </div>
-            </div> -->
 
             <style>
             /* CSS styling for the modals */
@@ -468,6 +451,7 @@
 
                 let solutionUrl = '';
 
+                // Get instructions from database
                 const html = `{{ exercise_details["instructions"] }}`;
 
                 const parser = new DOMParser();
@@ -491,46 +475,6 @@
 
                 var dropdownContent = document.getElementById("dropdown-content");
 
-                    // if (tool_feature === 0) {
-
-                    //     // Update the color of the dropdown menu and the button
-                    //     var buttonElement = document.getElementById('tool_button');
-                        
-                    //     if (buttonElement.classList.contains('is-primary')) {
-                    //         buttonElement.classList.remove('is-primary');
-                    //     }
-                    //     buttonElement.classList.add('is-dark');
-
-
-                    //     dropdownContent.innerHTML = "";
-
-                    //     Object.entries(steps).forEach(function ([stepNumber, stepContent]) {  
-                    //     var div = document.createElement("div");
-                    //     div.className = "dropdown-item";
-                    //     div.style.flex = "1";
-
-                    //     var p = document.createElement("p");
-                    //     p.style.textAlign = "justify";
-                    //     if (stepComplete[stepNumber - 1] === true) {
-                    //         p.style.textDecoration = "line-through";
-
-                    //     }
-                    //     else {
-                    //         p.style.textDecoration = "none";
-                    //     }
-                    //     p.textContent = stepNumber + ". " + stepContent;
-
-                    //     div.appendChild(p);
-                    //     dropdownContent.appendChild(div);
-
-                    //     const hrSteps = document.createElement("hr");
-                    //     hrSteps.className = "dropdown-divider";
-                    //     hrSteps.style.flexBasis = "100%";
-                    //     hrSteps.style.width = "100%";
-                    //     dropdownContent.appendChild(hrSteps);
-                    //     });
-                        
-                    // } else 
 
                 // Update the color of the dropdown menu and the button
                 var buttonElement = document.getElementById('tool_button');
@@ -578,16 +522,7 @@
                 hintElement.appendChild(hintButton);
                 dropdownContent.appendChild(hintElement);
 
-                
-                // // function to get user code from editor
-                // function get_user_code() {
-                //     user_code = editor.getSelectedText().trim();
-
-                //     if (user_code == "")
-                //         user_code = editor.getValue().trim();
-
-                //     return user_code;
-                // }
+        
 
                 // Open the hint modal and populate its content
                 function openHintModal(responseContent) {
@@ -669,7 +604,7 @@
                 }
 
                 async function handleHintButtonClick() {
-
+                    
                     $('#loading-indicator').show();
                     var hintCodeUrl = `/exercise_hint_code/{{ exercise_basics['id'] }}/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}`;
 
@@ -726,41 +661,7 @@
                 var modal = document.getElementById('code_review_modal');
                 modal.style.display = 'none';
                 document.getElementById('modal_background').removeEventListener('click', closeModal);
-            }
-
-            // async function get_static_step_process() {
-            //     try {
-            //             // Make an HTTP request to the exercise endpoint
-            //             const response = await fetch('/static/step_process.json');
-
-            //             // Check the response status
-            //             if (!response.ok) {
-            //                 throw new Error('Failed to fetch exercise data');
-            //             }
-            //             // Parse the response data
-            //             steps = await response.json();
-
-                        
-            //         } catch (error) {
-            //             console.error('Error:', error.message);
-            //         }
-                    
-            //     return steps;
-            // }
-
-            // function extractFeedback(text) {
-            //     var regex = /(\d+):([\s\S]*?)(?=\d+:|$)/g;
-            //     var feedback = {};
-            //     var match;
-
-            //     while ((match = regex.exec(text)) !== null) {
-            //         var stepNumber = match[1];
-            //         var feedbackContent = match[2].trim(); // Trim to remove extra spaces
-            //         feedback[stepNumber] = feedbackContent;
-            //     }
-
-            //     return feedback;
-            // }            
+            }           
 
             // Function to update feedback
             async function updateModal() {
@@ -839,40 +740,6 @@
                 // Show the feedback modal
                 modal.classList.add('is-active')
 
-            }
-
-            // Function to check step functionality and display feedback
-            function checkStepFunctionality() {
-                // let feedback = {};
-                // var reviewButton = document.getElementById('review_button');
-                // var url = `/exercise_feedback/{{ course_basics['id'] }}/{{ assignment_basics['id'] }}/{{ exercise_basics['id'] }}`;
-
-                // reviewButton.onclick = function() {
-                //     $.ajax({
-                //         type: 'GET',
-                //         url: url,
-                //     })
-                //     .done(function(response) {
-                //         try {
-                //             console.log(response);
-                //             feedback = JSON.parse(response);
-                            
-
-                //             Object.entries(feedback).forEach(function ([stepNumber, feedbackContent]) {
-                //                 var currentID = "step" + stepNumber + "_content";
-                //                 var currentFeedback = document.getElementById(currentID);
-                //                 currentFeedback.textContent = feedbackContent;
-                //             });
-
-                //         } catch (error) {
-                //             console.error("JSON Parsing error:", error);
-                //         }
-                //     })
-                //     .fail(function(error) {
-                //         console.error("AJAX error:", error);
-                //         // Handle the error message here if needed
-                //     });
-                // };
             }
             </script>
 
